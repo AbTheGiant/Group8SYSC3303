@@ -2,11 +2,11 @@
 public class elevatorMotor {
 	//int currentFloor,destinationFloor;
 	
-	public void move(int currFloor, int destFloor) {
+	public int move(int currFloor, int destFloor) {
 		if (currFloor>destFloor) {
-			moveDown(Math.abs(currFloor-destFloor));
+			return	moveDown(Math.abs(currFloor-destFloor));
 		}else {
-			moveUp(Math.abs(currFloor-destFloor));
+			return moveUp(Math.abs(currFloor-destFloor));
 		}
 	}
 	public int moveUp(int distance) {
