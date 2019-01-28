@@ -4,14 +4,14 @@ public class lampsClass {
 	private boolean turnedOn;
 	public  lampsClass() {
 		// TODO Auto-generated constructor stub
-		this.setButton(false);
+		this.setLamps(false);
 	}
 	
-	public void setButton(boolean temp) {
+	public void setLamps(boolean temp) {
 		this.turnedOn=temp;
 	}
 
-	public boolean getButton() {
+	public boolean getLamps() {
 		return turnedOn;
 	}
 	
