@@ -21,8 +21,8 @@ public class Scheduler {
 		try {
 	         // Construct a datagram socket and bind it to
 	         // port 2222. This socket will be used to
-	         // send UDP Datagram packets to the floor and elevator systems
-	         sendSocket = new DatagramSocket(2222);
+	         // send UDP Datagram packets to the elevator systems
+	         sendSocket = new DatagramSocket();
 
 	         // Construct a datagram socket and bind it to port 1111 
 	         // This socket will be used to
@@ -42,7 +42,7 @@ public class Scheduler {
 		
 	    byte data[] = new byte[100];
 	    receivePacket = new DatagramPacket(data, data.length);
-	    System.out.println("Server: Waiting for Packet.\n");
+	    System.out.println("Scheduler: Waiting for Packet.\n");
 	    
 	    // Waiting until a datagram packet is received from receiveSocket.
 	      try {        
@@ -55,7 +55,7 @@ public class Scheduler {
 	         System.exit(1);
 	      }
 	      
-	      System.out.println("Server: Packet received:");
+	      System.out.println("Scheduler: Packet received:");
 	      System.out.println("From host: " + receivePacket.getAddress());
 	      System.out.println("Host port: " + receivePacket.getPort());
 	      int len = receivePacket.getLength();
@@ -66,6 +66,35 @@ public class Scheduler {
 	      String received = new String(data,0,len);   
 	      System.out.println(received + "\n");
 	      
+	      byte [] dataToElevator = new byte [2];
+	      dataToElevator[0] = data[0];  //This is the position of the value for the floor number
+	      dataToElevator[1] = data [3]; //This is the position of the Elevator button
+	      //Sending the floor number and elevator button to Elevator system
+	      try {
+	          sendPacket = new DatagramPacket(dataToElevator, dataToElevator.length,
+	                                          InetAddress.getLocalHost(), 2222);
+	       } catch (UnknownHostException e) {
+	          e.printStackTrace();
+	          System.exit(1);
+	       }
+	      System.out.println("Client: Sending packet:");
+	      System.out.println("To host: " + sendPacket.getAddress());
+	      System.out.println("Destination host port: " + sendPacket.getPort());
+	      int len2 = sendPacket.getLength();
+	      System.out.println("Length: " + len2);
+
+	      // Send the datagram packet to the server via the send/receive socket. 
+
+	      try {
+	         sendSocket.send(sendPacket);
+	      } catch (IOException e) {
+	         e.printStackTrace();
+	         System.exit(1);
+	      }
+
+	      System.out.println("Client: Packet sent.\n");
+
+	      sendSocket.close();
 	      receiveSocket.close();
 	}
 	

@@ -78,7 +78,7 @@ public void sendAndReceive()
       // Prepare a DatagramPacket and send it via sendReceiveSocket
       // to port 1111 on the destination host.
  
-      String s = "2 Up 4";
+      String s = "2 Up 4"; //This is the format we will be expecting during simulation, from the TA's through a txt or cvs file but it will also have a time variable. I just left time out for quick testing
       System.out.println("Client: sending a packet containing:\n" + s);
 
       // Java stores characters as 16-bit Unicode values, but 
