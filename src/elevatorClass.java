@@ -17,7 +17,7 @@ public class elevatorClass {
 		currentFloor=0;
 		try {
 	        //create the datagram sockets for receiving
-	         receiveCallSocket = new DatagramSocket();
+	         receiveCallSocket = new DatagramSocket(2222);
 	         
 	        
 	      } catch (SocketException se)
@@ -58,7 +58,10 @@ public class elevatorClass {
 			      System.out.println("From host: " + receivePacket.getAddress());
 			      System.out.println("Host port: " + receivePacket.getPort());
 			      
-			      deployElevator(sortPacket(receivePacket.getData()));
+			      for (int i = 0; i < data.length; i++) {
+					deployElevator(data[i]);
+			      }
+			     // deployElevator(sortPacket(receivePacket.getData()));
 			      //int len = receivePacket.getLength();
 			      //System.out.println("Length: " + len);
 			     // System.out.println("Containing: " +receivePacket.getData()[0]);
@@ -66,10 +69,7 @@ public class elevatorClass {
 
 	}
 	
-	public int sortPacket(byte[] data) {
-		return 0;
-		
-	}
+	
 	
 	public void deployElevator(int destFloor) {
 		doors.setDoorState(true);

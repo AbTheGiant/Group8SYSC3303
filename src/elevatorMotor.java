@@ -1,7 +1,12 @@
 
 public class elevatorMotor {
-	//int currentFloor,destinationFloor;
+	//private int currentFloor,destinationFloor;
 	
+//	public elevatorMotor(int currentFloor) {
+//		
+//		this
+//	}
+//	
 	public int move(int currFloor, int destFloor) {
 		if (currFloor>destFloor) {
 			return	moveDown(Math.abs(currFloor-destFloor));

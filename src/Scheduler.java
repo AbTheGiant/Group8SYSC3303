@@ -38,11 +38,11 @@ public class Scheduler {
 		
 	}
 	
-	public void sendReceive() {
+	public void Receive() {
 		
 	    byte data[] = new byte[100];
 	    receivePacket = new DatagramPacket(data, data.length);
-	    System.out.println("Server: Waiting for Packet.\n");
+	    System.out.println("scheduler: Waiting for Packet.\n");
 	    
 	    // Waiting until a datagram packet is received from receiveSocket.
 	      try {        
@@ -62,15 +62,25 @@ public class Scheduler {
 	      System.out.println("Length: " + len);
 	      System.out.print("Containing: " );
 
+	      sortPacket(data);
 	      // Form a String from the byte array.
 	      String received = new String(data,0,len);   
 	      System.out.println(received + "\n");
 	      
 	      receiveSocket.close();
 	}
+	public byte[]  sortPacket(byte[] data) {
+		
+		
+		return null;
+		
+	}
+	public void send(byte[] sendData) {
+		
+	}
 	
 	public static void main(String[] args) {
 		Scheduler scheduler = new Scheduler ();
-		scheduler.sendReceive();
+		scheduler.Receive();
 	}
 }

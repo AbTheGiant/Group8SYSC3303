@@ -11,8 +11,6 @@ import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.SocketException;
 import java.net.UnknownHostException;
-import java.util.Calendar;
-import java.util.Date;
 
 public class IgnoreThisSchedulerTestClass {
 
@@ -42,6 +40,7 @@ public class IgnoreThisSchedulerTestClass {
 	   String[] input = s.split("\\s+");
 	   
 		   try {
+			   //time will go here
 			   floorNumber = Integer.parseInt(input[0]);
 			   floorDirection = input[1];
 			   elevatorButton = Integer.parseInt(input[2]);
