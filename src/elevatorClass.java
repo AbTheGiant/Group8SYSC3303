@@ -5,7 +5,7 @@ import java.net.SocketException;
 
 
 public class elevatorClass {
-	 int numFloors,currentFloor;
+	 int numFloors;
 	 DatagramSocket receiveCallSocket;
 	 DatagramPacket receivePacket;
 	 buttonClass [] elevatorButtons = new buttonClass[numFloors+1];
@@ -14,7 +14,7 @@ public class elevatorClass {
  	 elevatorMotor motor;
 	 public elevatorClass(int numFloors){
 		this.numFloors=numFloors; 	
-		currentFloor=0;
+		//currentFloor=0;
 		try {
 	        //create the datagram sockets for receiving
 	         receiveCallSocket = new DatagramSocket();
@@ -74,11 +74,14 @@ public class elevatorClass {
 	public void deployElevator(int destFloor) {
 		doors.setDoorState(true);
 		doors.setDoorState(false);
-		while (currentFloor!=destFloor) {
-			currentFloor=motor.move(currentFloor, destFloor);
+		/*while (motor.getCurrentFloor()!=destFloor) {
+			motor.getcurrentFloor=motor.move(currentFloor, destFloor);
+			motor.setCurrentFloor();
 			elevatorButtons[destFloor].setButton(true);
 			elevatorLamps[destFloor].setLamps(true);			
-		}
+		}*/
+		
+		motor.move(destFloor);
 		doors.setDoorState(true);
 		doors.setDoorState(false);
 	}
