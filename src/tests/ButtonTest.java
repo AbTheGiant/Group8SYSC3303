@@ -1,10 +1,9 @@
-import static org.junit.jupiter.api.Assertions.*;
+package tests;
 
+import org.junit.Test;
 
-import org.junit.jupiter.api.Test;
-
+import Common.buttonClass;
 import junit.framework.TestCase;
-
 
 class ButtonTest extends TestCase {
 
