@@ -18,11 +18,13 @@ public class elevatorMotor {
 		return currentFloor;
 	}
 	
-	public void move( int destFloor) {
+	public  void move( int destFloor) {
 		if (currentFloor>destFloor) {
 			moveDown(Math.abs(currentFloor-destFloor));
+			System.out.println("GOING_DOWN");
 		}else {
 			 moveUp(Math.abs(currentFloor-destFloor));
+			 System.out.println("GOING_UP");
 		}
 	}
 	public void moveUp(int distance) {

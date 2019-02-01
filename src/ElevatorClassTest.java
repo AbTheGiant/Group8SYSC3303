@@ -12,10 +12,11 @@ class ElevatorClassTest {
 		elevatorClass test=  new elevatorClass(7); 
 		//elevatorMotor testTwo =new elevatorMotor(5);
 		elevatorMotor tester = new elevatorMotor(3);
+		//test.deployElevator(destFloor);
 		
 		tester.move(4);
 		//test.deployElevator(4);
-		assertEquals(StateMachineEnum.GOING_UP,test.getState());
+		assertEquals(StateMachineEnum.STATIONARY,test.getState());
 		//assertTrue(StateMachineEnum.GOING_DOWN.compareTo(test.getState())==1);
 		
 		}
