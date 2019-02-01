@@ -14,7 +14,7 @@ public class Scheduler {
 	int elevatorButton;
 	
 	DatagramPacket sendPacket, receivePacket;
-	DatagramSocket sendSocket, receiveSocket;
+	DatagramSocket elevatorSendSocket, receiveSocket,floorSendSocket;
 	
 	public Scheduler() {
 		
@@ -22,11 +22,14 @@ public class Scheduler {
 	         // Construct a datagram socket and bind it to
 	         // port 2222. This socket will be used to
 	         // send UDP Datagram packets to the elevator systems
-	         sendSocket = new DatagramSocket();
+	         elevatorSendSocket = new DatagramSocket();
+	         
+	         //floor send socket
+	         floorSendSocket =  new DatagramSocket(3333);
 
 	         // Construct a datagram socket and bind it to port 1111 
 	         // This socket will be used to
-	         // receive UDP Datagram packets.from the floor and elevator systems
+	         // receive UDP Datagram packets.from the floor and elevator systems````
 	         receiveSocket = new DatagramSocket(1111);
 	         
 	         // to test socket timeout (2 seconds)
@@ -63,20 +66,39 @@ public class Scheduler {
 	      System.out.print("Containing: " );
 
 	      // Form a String from the byte array.
-	      String received = new String(data,0,len);   
+	      String received = new String(data,0,len);
 	      System.out.println(received + "\n");
-	      
-	      byte [] dataToElevator = new byte [2];
-	      dataToElevator[0] = data[0];  //This is the position of the value for the floor number
-	      dataToElevator[1] = data [3]; //This is the position of the Elevator button
-	      //Sending the floor number and elevator button to Elevator system
-	      try {
-	          sendPacket = new DatagramPacket(dataToElevator, dataToElevator.length,
-	                                          InetAddress.getLocalHost(), 2222);
-	       } catch (UnknownHostException e) {
-	          e.printStackTrace();
-	          System.exit(1);
-	       }
+	     
+	      //if the the 4th info is 1 then sendpacket to elevator,
+	      //otherwise if 0, then send to the floor 
+	      if(data[4] == 1) {
+	    	  byte [] dataToElevator = new byte [2];
+		      dataToElevator[0] = data[0];  //This is the position of the value for the floor number
+		      dataToElevator[1] = data [3]; //This is the position of the Elevator button
+		      //Sending the floor number and elevator button to Elevator system
+		      try {
+		          sendPacket = new DatagramPacket(dataToElevator, dataToElevator.length,
+		                                    InetAddress.getLocalHost(), 2222);
+		      }
+		      catch (UnknownHostException e) {
+		          e.printStackTrace();
+		          System.exit(1);
+		       }
+	      }
+	      else if(data[4] == 0) {
+	    	  byte [] dataToFloor = new byte [1];
+		      dataToFloor[0] = data[0];
+		      dataToFloor[1] = data[1];
+		      //Sending the floor number and floor direction
+		      try {
+		    	  sendPacket = new DatagramPacket(dataToFloor, dataToFloor.length,InetAddress.getLocalHost(),3333);
+		      }
+		      catch (UnknownHostException e) {
+		          e.printStackTrace();
+		          System.exit(1);
+		       }
+	      }
+	   
 	      System.out.println("Client: Sending packet:");
 	      System.out.println("To host: " + sendPacket.getAddress());
 	      System.out.println("Destination host port: " + sendPacket.getPort());
@@ -86,7 +108,7 @@ public class Scheduler {
 	      // Send the datagram packet to the server via the send/receive socket. 
 
 	      try {
-	         sendSocket.send(sendPacket);
+	         elevatorSendSocket.send(sendPacket);
 	      } catch (IOException e) {
 	         e.printStackTrace();
 	         System.exit(1);
@@ -94,7 +116,7 @@ public class Scheduler {
 
 	      System.out.println("Client: Packet sent.\n");
 
-	      sendSocket.close();
+	      elevatorSendSocket.close();
 	      receiveSocket.close();
 	}
 	
