@@ -3,9 +3,6 @@ import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.SocketException;
 
-import org.hamcrest.core.Is;
-
-
 public class elevatorClass {
 	 int numFloors;
 	 
@@ -84,12 +81,6 @@ public class elevatorClass {
 	public void deployElevator(int destFloor) {
 		doors.setDoorState(true);
 		doors.setDoorState(false);
-		/*while (motor.getCurrentFloor()!=destFloor) {
-			motor.getcurrentFloor=motor.move(currentFloor, destFloor);
-			motor.setCurrentFloor();
-			elevatorButtons[destFloor].setButton(true);
-			elevatorLamps[destFloor].setLamps(true);			
-		}*/
 		
 		if (motor.getCurrentFloor() > destFloor) {
 			stateMachineEnum = StateMachineEnum.GOING_DOWN;
