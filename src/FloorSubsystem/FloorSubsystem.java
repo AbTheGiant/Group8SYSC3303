@@ -40,7 +40,7 @@ public class FloorSubsystem {
 	// (send to simulator) mode
 	
 
-	public FloorSubsystem() {
+	public FloorSubsystem(int floor) {
 		//
 		lampUp.setLamps(false);
 		lampDown.setLamps(false);
@@ -49,7 +49,7 @@ public class FloorSubsystem {
 		ButtonUpLamp.setLamps(false);
 		ButtonDownLamp.setLamps(false);
 		
-		floorNumber = 5;//CONFIGURABLE FLOOR NUMBER GOES HERE
+		floorNumber = floor;//CONFIGURABLE FLOOR NUMBER GOES HERE
 
 		{
 			   try {
@@ -73,7 +73,7 @@ public class FloorSubsystem {
 			      se.printStackTrace();
 			      System.exit(1);
 			   }
-	    System.out.println("FloorSubsystem: Requesting Elevator to floor"+floorNumber+".\n");
+	    System.out.println("FloorSubsystem: Requesting Elevator to floor "+floorNumber+".\n");
 	    byte[] data = new byte[5];
 	    
 	    data[0] = (byte) floorNumber;//floornumber of subsystem/destination requested
@@ -90,6 +90,13 @@ public class FloorSubsystem {
 	          e.printStackTrace();
 	          System.exit(1);
 	       }
+	    
+	      try {
+		        sendReceiveSocket.send(sendPacket);
+		      } catch (IOException e) {
+		         e.printStackTrace();
+		         System.exit(1);
+		      }
 	}
 	
 	
@@ -161,7 +168,7 @@ public class FloorSubsystem {
 	public static void main( String args[] )
 	{
 	 
-		FloorSubsystem f1 = new FloorSubsystem();
+		FloorSubsystem f1 = new FloorSubsystem(5);
 		f1.send(1);
 	}
 	

@@ -18,7 +18,10 @@ public class Scheduler {
 	DatagramSocket receiveSocket, SendSocket;
 	
 	public Scheduler() {
-		
+				
+	}
+	
+	private void initSockets() {
 		try {
 	         // Construct a datagram socket and bind it to
 	         // port 2222. This socket will be used to
@@ -41,8 +44,10 @@ public class Scheduler {
 	      } 
 		
 	}
-	
+
 	public void sendReceive() {
+		
+		initSockets();
 		
 	    byte data[] = new byte[100];
 	    receivePacket = new DatagramPacket(data, data.length);
@@ -100,7 +105,7 @@ public class Scheduler {
 		       }
 	      }
 	   
-	      System.out.println("Client: Sending packet:");
+	      System.out.println("Scheduler:\n Sending packet:");
 	      System.out.println("To host: " + sendPacket.getAddress());
 	      System.out.println("Destination host port: " + sendPacket.getPort());
 	      int len2 = sendPacket.getLength();
@@ -108,12 +113,7 @@ public class Scheduler {
 
 	      // Send the datagram packet to the server via the send/receive socket. 
 
-	      try {
-	         SendSocket.send(sendPacket);
-	      } catch (IOException e) {
-	         e.printStackTrace();
-	         System.exit(1);
-	      }
+
 
 	      System.out.println("Client: Packet sent.\n");
 
@@ -123,6 +123,9 @@ public class Scheduler {
 	
 	public static void main(String[] args) {
 		Scheduler scheduler = new Scheduler ();
-		scheduler.sendReceive();
+		while (true)
+		{
+			scheduler.sendReceive();
+		}
 	}
 }
