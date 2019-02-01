@@ -3,9 +3,13 @@ import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.SocketException;
 
+import org.hamcrest.core.Is;
+
 
 public class elevatorClass {
-	 int numFloors,currentFloor;
+	 int numFloors;
+	 
+	 StateMachineEnum stateMachineEnum ;
 	 DatagramSocket receiveCallSocket;
 	 DatagramPacket receivePacket;
 	 buttonClass [] elevatorButtons = new buttonClass[numFloors+1];
@@ -14,7 +18,8 @@ public class elevatorClass {
  	 elevatorMotor motor;
 	 public elevatorClass(int numFloors){
 		this.numFloors=numFloors; 	
-		currentFloor=0;
+		stateMachineEnum= StateMachineEnum.STATIONARY;
+		//currentFloor=0;
 		try {
 	        //create the datagram sockets for receiving
 	         receiveCallSocket = new DatagramSocket(2222);
@@ -33,6 +38,10 @@ public class elevatorClass {
 		}
 	 }
 	 
+	 public StateMachineEnum getState() {
+		 return this.stateMachineEnum; 
+		 
+	 }	 
 	 
 	
 	public void receiveCall() {
@@ -71,18 +80,33 @@ public class elevatorClass {
 	
 	
 	
+	
 	public void deployElevator(int destFloor) {
 		doors.setDoorState(true);
 		doors.setDoorState(false);
-		while (currentFloor!=destFloor) {
-			currentFloor=motor.move(currentFloor, destFloor);
+		/*while (motor.getCurrentFloor()!=destFloor) {
+			motor.getcurrentFloor=motor.move(currentFloor, destFloor);
+			motor.setCurrentFloor();
 			elevatorButtons[destFloor].setButton(true);
 			elevatorLamps[destFloor].setLamps(true);			
+		}*/
+		
+		if (motor.getCurrentFloor() > destFloor) {
+			stateMachineEnum = StateMachineEnum.GOING_DOWN;
 		}
+		else if (motor.getCurrentFloor() < destFloor) {
+			stateMachineEnum = StateMachineEnum.GOING_UP;
+		}
+		else {
+			stateMachineEnum = StateMachineEnum.STATIONARY;
+		}
+		motor.move(destFloor);
+		
 		doors.setDoorState(true);
 		doors.setDoorState(false);
 	}
-		
+	
+	
 	public static void main(String args[])
 	   {
 		 //start the program
