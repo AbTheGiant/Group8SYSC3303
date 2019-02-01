@@ -1,7 +1,11 @@
+package Elevator;
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.SocketException;
+
+import Common.buttonClass;
+import Common.lampsClass;
 
 
 public class elevatorClass {
@@ -65,7 +69,6 @@ public class elevatorClass {
 			      
 
 	}
-	
 	public int sortPacket(byte[] data) {
 		return 0;
 		
@@ -79,6 +82,7 @@ public class elevatorClass {
 			elevatorButtons[destFloor].setButton(true);
 			elevatorLamps[destFloor].setLamps(true);			
 		}
+		//make sure you unset the buttons/lamps once destination reached.
 		doors.setDoorState(true);
 		doors.setDoorState(false);
 	}

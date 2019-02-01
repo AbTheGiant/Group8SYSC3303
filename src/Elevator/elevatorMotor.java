@@ -1,3 +1,4 @@
+package Elevator;
 
 public class elevatorMotor {
 	//int currentFloor,destinationFloor;

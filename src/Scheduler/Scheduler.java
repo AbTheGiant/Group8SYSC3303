@@ -1,3 +1,4 @@
+package Scheduler;
 //Scheduler.java
 //This class manages the interaction between the Floor Subsytems and Elevator class.
 
@@ -14,7 +15,7 @@ public class Scheduler {
 	int elevatorButton;
 	
 	DatagramPacket sendPacket, receivePacket;
-	DatagramSocket elevatorSendSocket, receiveSocket,floorSendSocket;
+	DatagramSocket receiveSocket, SendSocket;
 	
 	public Scheduler() {
 		
@@ -22,10 +23,10 @@ public class Scheduler {
 	         // Construct a datagram socket and bind it to
 	         // port 2222. This socket will be used to
 	         // send UDP Datagram packets to the elevator systems
-	         elevatorSendSocket = new DatagramSocket();
+	         SendSocket = new DatagramSocket();
 	         
 	         //floor send socket
-	         floorSendSocket =  new DatagramSocket(3333);
+	         SendSocket =  new DatagramSocket();
 
 	         // Construct a datagram socket and bind it to port 1111 
 	         // This socket will be used to
@@ -74,7 +75,7 @@ public class Scheduler {
 	      if(data[4] == 1) {
 	    	  byte [] dataToElevator = new byte [2];
 		      dataToElevator[0] = data[0];  //This is the position of the value for the floor number
-		      dataToElevator[1] = data [3]; //This is the position of the Elevator button
+		      dataToElevator[1] = data [1]; //This is the direction of the Elevator 0=down, 1=up
 		      //Sending the floor number and elevator button to Elevator system
 		      try {
 		          sendPacket = new DatagramPacket(dataToElevator, dataToElevator.length,
@@ -87,8 +88,8 @@ public class Scheduler {
 	      }
 	      else if(data[4] == 0) {
 	    	  byte [] dataToFloor = new byte [1];
-		      dataToFloor[0] = data[0];
-		      dataToFloor[1] = data[1];
+		      dataToFloor[0] = data[0];//floor number
+		      dataToFloor[1] = data[1];//direction, 0 = down, 1 = up;
 		      //Sending the floor number and floor direction
 		      try {
 		    	  sendPacket = new DatagramPacket(dataToFloor, dataToFloor.length,InetAddress.getLocalHost(),3333);
@@ -108,7 +109,7 @@ public class Scheduler {
 	      // Send the datagram packet to the server via the send/receive socket. 
 
 	      try {
-	         elevatorSendSocket.send(sendPacket);
+	         SendSocket.send(sendPacket);
 	      } catch (IOException e) {
 	         e.printStackTrace();
 	         System.exit(1);
@@ -116,7 +117,7 @@ public class Scheduler {
 
 	      System.out.println("Client: Packet sent.\n");
 
-	      elevatorSendSocket.close();
+	      SendSocket.close();
 	      receiveSocket.close();
 	}
 	

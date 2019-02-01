@@ -1,3 +1,4 @@
+package Common;
 
 public class buttonClass {
 	private boolean pushed;
