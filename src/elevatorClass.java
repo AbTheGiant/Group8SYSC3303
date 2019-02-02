@@ -8,17 +8,19 @@ import org.hamcrest.core.Is;
 
 public class elevatorClass {
 	 int numFloors;
-	 
+	 int  currentFloor; 
+	 elevatorMotor motor;
 	 StateMachineEnum stateMachineEnum ;
 	 DatagramSocket receiveCallSocket;
 	 DatagramPacket receivePacket;
 	 buttonClass [] elevatorButtons = new buttonClass[numFloors+1];
  	 lampsClass [] elevatorLamps = new lampsClass[numFloors+1];
  	 elevatorDoors doors;
- 	 elevatorMotor motor;
+ 	 
 	 public elevatorClass(int numFloors){
 		this.numFloors=numFloors; 	
-		stateMachineEnum= StateMachineEnum.STATIONARY;
+		stateMachineEnum= motor.getState();
+		currentFloor = this.motor.getCurrentFloor();
 		//currentFloor=0;
 		try {
 	        //create the datagram sockets for receiving
@@ -31,17 +33,51 @@ public class elevatorClass {
 	         System.exit(1);
 	      } 
 	 }	 
+	 public void setMotor(elevatorMotor temp) {
+		 this.motor= temp;
+		 
+	 }
+	 
+	 public void setCurrentFloor() {
+		 this.currentFloor = motor.getCurrentFloor();
+	 }
+	 public int getCurrentFloor() {
+		 
+		 return currentFloor;
+	 }
+	 public void  setState() {
+		 
+		 stateMachineEnum = this.motor.getState();
+	 }
+	 
+	 
 	 public void createButtons() {
 		for (int i = 1; i < numFloors+1; i++) {
 			elevatorButtons[i]=new buttonClass();
 			elevatorLamps[i]=new lampsClass();
 		}
 	 }
-	 
-	 public StateMachineEnum getState() {
-		 return this.stateMachineEnum; 
 		 
-	 }	 
+	public void deployElevator(int destFloor) {
+			doors.setDoorState(true);
+			doors.setDoorState(false);
+			/*while (motor.getCurrentFloor()!=destFloor) {
+				motor.getcurrentFloor=motor.move(currentFloor, destFloor);
+				motor.setCurrentFloor();
+				elevatorButtons[destFloor].setButton(true);
+				elevatorLamps[destFloor].setLamps(true);			
+			}*/
+			
+			
+			System.out.println(this.currentFloor);
+
+			this.motor.move(destFloor);
+			this.setCurrentFloor();
+			
+			doors.setDoorState(true);
+			doors.setDoorState(false);
+		}
+		
 	 
 	
 	public void receiveCall() {
@@ -81,31 +117,7 @@ public class elevatorClass {
 	}
 	
 	
-	public void deployElevator(int destFloor) {
-		doors.setDoorState(true);
-		doors.setDoorState(false);
-		/*while (motor.getCurrentFloor()!=destFloor) {
-			motor.getcurrentFloor=motor.move(currentFloor, destFloor);
-			motor.setCurrentFloor();
-			elevatorButtons[destFloor].setButton(true);
-			elevatorLamps[destFloor].setLamps(true);			
-		}*/
-		
-		if (motor.getCurrentFloor() > destFloor) {
-			stateMachineEnum = StateMachineEnum.GOING_DOWN;
-		}
-		else if (motor.getCurrentFloor() < destFloor) {
-			stateMachineEnum = StateMachineEnum.GOING_UP;
-		}
-		else {
-			stateMachineEnum = StateMachineEnum.STATIONARY;
-		}
-		motor.move(destFloor);
-		
-		doors.setDoorState(true);
-		doors.setDoorState(false);
-	}
-	
+
 	
 	public static void main(String args[])
 	   {

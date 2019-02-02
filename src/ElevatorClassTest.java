@@ -5,19 +5,30 @@ import org.junit.jupiter.api.Test;
 class ElevatorClassTest {
 
 	@Test
+	
 	void deployElevator() {
-		
+		System.out.println("gooooo");
 		
 		try {
+		System.out.println("gooooo");
 		elevatorClass test=  new elevatorClass(7); 
-		//elevatorMotor testTwo =new elevatorMotor(5);
-		elevatorMotor tester = new elevatorMotor(3);
-		//test.deployElevator(destFloor);
+		System.out.println("gooooo");
 		
-		tester.move(4);
-		//test.deployElevator(4);
-		assertEquals(StateMachineEnum.STATIONARY,test.getState());
-		//assertTrue(StateMachineEnum.GOING_DOWN.compareTo(test.getState())==1);
+		elevatorMotor tester = new elevatorMotor(3);
+		test.setMotor(tester);
+		System.out.println("gooooo");
+		//test.setMotor(tester);
+		//test.deployElevator(5);
+		//elevatorMotor motor= new elevatorMotor(4); 
+		//motor.move(6);
+		test.deployElevator(6);
+		//tester.move(4);
+		System.out.println("gooooo");
+		assertEquals(null,test.motor);
+		
+		
+		
+		System.out.println("gooooo");
 		
 		}
 		catch (Exception e) {
