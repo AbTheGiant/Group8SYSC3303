@@ -1,28 +1,47 @@
 package Elevator;
 
+
 public class elevatorMotor {
-	//int currentFloor,destinationFloor;
+	 
 	
-	public int move(int currFloor, int destFloor) {
-		if (currFloor>destFloor) {
-			return	moveDown(Math.abs(currFloor-destFloor));
+	private int currentFloor;
+	
+	public elevatorMotor(int current) {
+		this.currentFloor= current;
+		
+		
+	}
+	
+	public void setCurrentFloor(int current) {
+		this.currentFloor= current;
+		
+	}
+	public int getCurrentFloor() {
+		return currentFloor;
+	}
+	
+	public  void move( int destFloor) {
+		if (currentFloor>destFloor) {
+			moveDown(Math.abs(currentFloor-destFloor));
+			System.out.println("GOING_DOWN");
 		}else {
-			return moveUp(Math.abs(currFloor-destFloor));
+			 moveUp(Math.abs(currentFloor-destFloor));
+			 System.out.println("GOING_UP");
 		}
 	}
-	public int moveUp(int distance) {
+	public void moveUp(int distance) {
 		for (int i = 0; i < distance; i++) {
 			waitTime();
-			distance++;
+			currentFloor++;
 		}
-		return distance;
+		//return distance;
 	}
-	public int moveDown(int distance) {
+	public void moveDown(int distance) {
 		for (int i = 0; i < distance; i++) {
 			waitTime();
-			distance--;
+			currentFloor--;
 		}
-		return distance;
+		
 	}
 	public void waitTime() {
 		 // Slow things down (wait 2 seconds)

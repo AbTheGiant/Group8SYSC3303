@@ -1,15 +1,15 @@
 package Elevator;
+
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.SocketException;
-
-import Common.buttonClass;
-import Common.lampsClass;
-
+import Common.*;
 
 public class elevatorClass {
-	 int numFloors,currentFloor;
+	 int numFloors;
+	 
+	 StateMachineEnum stateMachineEnum ;
 	 DatagramSocket receiveCallSocket;
 	 DatagramPacket receivePacket;
 	 buttonClass [] elevatorButtons = new buttonClass[numFloors+1];
@@ -18,10 +18,11 @@ public class elevatorClass {
  	 elevatorMotor motor;
 	 public elevatorClass(int numFloors){
 		this.numFloors=numFloors; 	
-		currentFloor=0;
+		stateMachineEnum= StateMachineEnum.STATIONARY;
+		//currentFloor=0;
 		try {
 	        //create the datagram sockets for receiving
-	         receiveCallSocket = new DatagramSocket();
+	         receiveCallSocket = new DatagramSocket(2222);
 	         
 	        
 	      } catch (SocketException se)
@@ -37,6 +38,10 @@ public class elevatorClass {
 		}
 	 }
 	 
+	 public StateMachineEnum getState() {
+		 return this.stateMachineEnum; 
+		 
+	 }	 
 	 
 	
 	public void receiveCall() {
@@ -62,31 +67,40 @@ public class elevatorClass {
 			      System.out.println("From host: " + receivePacket.getAddress());
 			      System.out.println("Host port: " + receivePacket.getPort());
 			      
-			      deployElevator(sortPacket(receivePacket.getData()));
+			      for (int i = 0; i < data.length; i++) {
+					deployElevator(data[i]);
+			      }
+			     // deployElevator(sortPacket(receivePacket.getData()));
 			      //int len = receivePacket.getLength();
 			      //System.out.println("Length: " + len);
 			     // System.out.println("Containing: " +receivePacket.getData()[0]);
 			      
 
 	}
-	public int sortPacket(byte[] data) {
-		return 0;
-		
-	}
+	
+	
+	
 	
 	public void deployElevator(int destFloor) {
 		doors.setDoorState(true);
 		doors.setDoorState(false);
-		while (currentFloor!=destFloor) {
-			currentFloor=motor.move(currentFloor, destFloor);
-			elevatorButtons[destFloor].setButton(true);
-			elevatorLamps[destFloor].setLamps(true);			
+		
+		if (motor.getCurrentFloor() > destFloor) {
+			stateMachineEnum = StateMachineEnum.GOING_DOWN;
 		}
-		//make sure you unset the buttons/lamps once destination reached.
+		else if (motor.getCurrentFloor() < destFloor) {
+			stateMachineEnum = StateMachineEnum.GOING_UP;
+		}
+		else {
+			stateMachineEnum = StateMachineEnum.STATIONARY;
+		}
+		motor.move(destFloor);
+		
 		doors.setDoorState(true);
 		doors.setDoorState(false);
 	}
-		
+	
+	
 	public static void main(String args[])
 	   {
 		 //start the program
