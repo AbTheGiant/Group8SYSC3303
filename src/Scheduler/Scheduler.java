@@ -63,7 +63,7 @@ public class Scheduler {
 	         e.printStackTrace();
 	         System.exit(1);
 	      }
-	      
+	      //write to console usefull info about the packet
 	      System.out.println("Scheduler: Packet received:");
 	      System.out.println("From host: " + receivePacket.getAddress());
 	      System.out.println("Host port: " + receivePacket.getPort());
@@ -74,14 +74,15 @@ public class Scheduler {
 	      // Form a String from the byte array.
 	      System.out.println(makeString(data, len) + "\n");
 	     
-	      //if the the 4th info is 1 then sendpacket to elevator,
-	      //otherwise if 0, then send to the floor 
+	      //this string is used to output to the console where the scheduler is sending packets
 	      String dest = "";
+	      //Our data[4] represents which way the data shuld flow, 1 = to Elevator, 0 = to Floor
 	      if(data[4] == 1) {
-	    	  dest = "Elevator"; 
-	    	  byte [] dataToElevator = new byte [2];
+	    	  dest = "Elevator"; //sending packet to the elevator
+	    	  byte [] dataToElevator = new byte [3];
 		      dataToElevator[0] = data[0];  //This is the position of the value for the floor number
 		      dataToElevator[1] = data [1]; //This is the direction of the Elevator 0=down, 1=up
+		      dataToElevator[2] = data[2]; // this is the requested destination floor 
 		      //Sending the floor number and elevator button to Elevator system
 		      try {
 		          sendPacket = new DatagramPacket(dataToElevator, dataToElevator.length,
@@ -93,13 +94,16 @@ public class Scheduler {
 		       }
 	      }
 	      else if(data[4] == 0) {
-	    	  dest = "Floor Subsystem"; 
-	    	  byte [] dataToFloor = new byte [1];
+	    	  dest = "Floor Subsystem"; //sending packet to the floor subsystem
+	    	  byte [] dataToFloor = new byte [4];
 		      dataToFloor[0] = data[0];//floor number
 		      dataToFloor[1] = data[1];//direction, 0 = down, 1 = up;
+		      dataToFloor[2] = data[2];//destination of the elevator
+		      dataToFloor[3] = data[3];//status message for floor,0 = on the way, 1 = arrived
+		      
 		      //Sending the floor number and floor direction
 		      try {
-		    	  sendPacket = new DatagramPacket(dataToFloor, dataToFloor.length,InetAddress.getLocalHost(),3333);
+		    	  sendPacket = new DatagramPacket(dataToFloor, dataToFloor.length,InetAddress.getLocalHost(),3330 + data[0]);
 		      }
 		      catch (UnknownHostException e) {
 		          e.printStackTrace();
@@ -115,7 +119,12 @@ public class Scheduler {
 	      System.out.println("Containing: "+ makeString(sendPacket.getData(), sendPacket.getLength()) + "\n");
 
 	      // Send the datagram packet to the server via the send/receive socket. 
-
+	      try {
+		        SendSocket.send(sendPacket);
+		      } catch (IOException e) {
+		         e.printStackTrace();
+		         System.exit(1);
+		      }
 
 
 	      System.out.println("Client: Packet sent.\n");
@@ -123,6 +132,7 @@ public class Scheduler {
 	      SendSocket.close();
 	      receiveSocket.close();
 	}
+	//A support method that converts a byte[] into a string;
 	public static String makeString(byte[] data, int length)
 	{
 		String retVal = "";
@@ -133,7 +143,7 @@ public class Scheduler {
 		retVal.substring(0, retVal.length()-1);
 		return retVal;
 	}
-	
+	//The main inits the scheduler and then infinitely listens for messages
 	public static void main(String[] args) {
 		Scheduler scheduler = new Scheduler ();
 		while (true)
