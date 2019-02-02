@@ -72,12 +72,13 @@ public class Scheduler {
 	      System.out.print("Containing: " );
 
 	      // Form a String from the byte array.
-	      String received = new String(data,0,len);
-	      System.out.println(received + "\n");
+	      System.out.println(makeString(data, len) + "\n");
 	     
 	      //if the the 4th info is 1 then sendpacket to elevator,
 	      //otherwise if 0, then send to the floor 
+	      String dest = "";
 	      if(data[4] == 1) {
+	    	  dest = "Elevator"; 
 	    	  byte [] dataToElevator = new byte [2];
 		      dataToElevator[0] = data[0];  //This is the position of the value for the floor number
 		      dataToElevator[1] = data [1]; //This is the direction of the Elevator 0=down, 1=up
@@ -92,6 +93,7 @@ public class Scheduler {
 		       }
 	      }
 	      else if(data[4] == 0) {
+	    	  dest = "Floor Subsystem"; 
 	    	  byte [] dataToFloor = new byte [1];
 		      dataToFloor[0] = data[0];//floor number
 		      dataToFloor[1] = data[1];//direction, 0 = down, 1 = up;
@@ -105,11 +107,12 @@ public class Scheduler {
 		       }
 	      }
 	   
-	      System.out.println("Scheduler:\n Sending packet:");
+	      System.out.println("Scheduler:\n Sending packet to "+dest+" :");
 	      System.out.println("To host: " + sendPacket.getAddress());
 	      System.out.println("Destination host port: " + sendPacket.getPort());
 	      int len2 = sendPacket.getLength();
 	      System.out.println("Length: " + len2);
+	      System.out.println("Containing: "+ makeString(sendPacket.getData(), sendPacket.getLength()) + "\n");
 
 	      // Send the datagram packet to the server via the send/receive socket. 
 
@@ -119,6 +122,16 @@ public class Scheduler {
 
 	      SendSocket.close();
 	      receiveSocket.close();
+	}
+	public static String makeString(byte[] data, int length)
+	{
+		String retVal = "";
+		for (int i = 0; i < length; i++)
+		{
+			retVal+= data[i] + ",";
+		}
+		retVal.substring(0, retVal.length()-1);
+		return retVal;
 	}
 	
 	public static void main(String[] args) {
