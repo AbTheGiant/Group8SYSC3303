@@ -23,8 +23,8 @@ public class FloorSubsystem {
 	//this will be used when the timing is introduced in the next iteration, right now it does nothing
 	Date time;
 	//These two lamps are the directional lamp indicating which way the elevator is headed.
-	lampsClass lampUp = new lampsClass();
-	lampsClass lampDown = new lampsClass();
+	public lampsClass lampUp = new lampsClass();
+	public lampsClass lampDown = new lampsClass();
 	//This is the floornumber of the subsystem
 	int floorNumber; 
 	//this boolean is used exclusively for the iteration1 interaction i set up
@@ -130,12 +130,12 @@ public class FloorSubsystem {
 	      //first i update the directional lamp
 	      if (data[1] == 0)
 	      {
-	    	  lampUp.setLamps(true);
-	    	  lampDown.setLamps(false);
+	    	  lampUp.setLamps(false);
+	    	  lampDown.setLamps(true);
 	      }
 	      else if (data[1] == 1) {
-	    	  lampDown.setLamps(true);
-	    	  lampUp.setLamps(false);
+	    	  lampDown.setLamps(false);
+	    	  lampUp.setLamps(true);
 
 	      }
 	      //Then I check to see if it has arrived or is on the way
