@@ -21,7 +21,7 @@ public class Scheduler {
 				
 	}
 	
-	private void initSockets() {
+	public void initSockets() {
 		try {
 	         // Construct a datagram socket and bind it to
 	         // port 2222. This socket will be used to
