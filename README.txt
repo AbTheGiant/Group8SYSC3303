@@ -11,7 +11,7 @@ Usman Babakura 	101045195
 Kyle Smith 	101045797
 Meet Digrajkar 	101041284
 Abiola Olajide 	101005746
-Emmanuel Dairo
+Emmanuel Dairo	101010678
 
 TABLE OF CONTENT: PACKAGES, SETUP, HOW TO RUN, RESPONSIBILITIES
 
