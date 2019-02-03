@@ -8,10 +8,10 @@ Group: Group 8
 
 Members:
 Usman Babakura 	101045195
-Kyle Smith 		101045797
+Kyle Smith 	101045797
 Meet Digrajkar 	101041284
 Abiola Olajide 	101005746
-Emmanuel 
+Emmanuel Dairo
 
 TABLE OF CONTENT: PACKAGES, SETUP, HOW TO RUN, RESPONSIBILITIES
 
@@ -37,24 +37,32 @@ PACKAGES: There are five packages included in the src folder. Each package conta
 							ButtonTest.java : The duty of this class is to test the buttons in the systems.
 							ElevatorClassTest.java : The duty of this class is to test the functionality of the elevator class
 							ElevatorMotor.java : The duty of this class is to test the motors in the elevator system.
-							
+							FloorSubSystemClassTest.java : The duty of this class is to test the functionality of the floor subsystem
+							SchedulerClassTest.java : The duty of this class is to test the functionality of the Scheduler class
 SETUP:
 
-Before you begin, please be sure to include JUnit 5 as a library in the project for the Test classes to work appropriately
+-Download the .zip which contains the entire project and source code
+-Extract the zip onto your computer
+-In Eclipse goto "File->Open Projects from File System..." then click the "Directory..." button beside import source and navigate to the Group8SYSC3303 folder and select it
+-Next you must include the JUnit 5 library in your buildpath (right click src, build path, configure build path, goto the libraries tab, Add library... JUnit, Next, JUnit5, Finish)
+
 
 HOW TO RUN:
+	System:
+	- Begin by running the elevatorClass.java file
+	- Once the elevator is waiting to receive a packet, proceed to run the Scheduler.java file
+	- Finally run the FloorSubsystem.java file. This file contains an interactive demo for the T.A's
 
-- Begin by running the elevatorClass.java file
-- Once the elevator is waiting to receive a packet, proceed to run the Scheduler.java file
-- Finally run the FloorSubsystem.java file. This file contains an interactive demo for the T.A's
+	Tests:
+	-Just run the .java of the test
 
 RESPONSIBILITIES:
 
-Scheduler - 			Usman Babakura and Meet Digrajkar
-FloorSubsystem - 		Kyle Smith
-Elevator - 				Abiola Olajide and Emmanuel
-README.txt - 			Usman Babakura
+Scheduler - 		Usman Babakura and Meet Digrajkar
+FloorSubsystem - 	Kyle Smith
+Elevator - 		Abiola Olajide and Emmanuel
+README.txt - 		Usman Babakura and Kyle Smith
 JUnit and Test Cases - 	Kyle Smith, Meet Digrajkar and Abiola Olajide
 State Machine Diagram - Kyle Smith
-UML Diagram - 
+UML Diagram - 		Meet Digrajkar
 
