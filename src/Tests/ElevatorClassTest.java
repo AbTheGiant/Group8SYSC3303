@@ -13,7 +13,7 @@ class ElevatorClassTest {
 		
 		
 		try {
-		elevatorClass test=  new elevatorClass(7); 
+		elevatorClass test=  new elevatorClass(7,1); 
 		//elevatorMotor testTwo =new elevatorMotor(5);
 		elevatorMotor tester = new elevatorMotor(3);
 		//test.deployElevator(destFloor);

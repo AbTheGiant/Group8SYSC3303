@@ -6,12 +6,17 @@ import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.SocketException;
 import java.net.UnknownHostException;
+import java.util.ArrayList;
+import java.util.Collections;
 
 import Common.*;
 
-public class elevatorClass {
+public class elevatorClass implements Runnable{
 	//the number of floors the elevator services
-	 int numFloors;
+	 int numFloors,elevatorNumber;
+	 
+	ArrayList<Integer> floorsToVisit= new ArrayList<Integer>();
+	
 	 //the enum holding the state of the elevator
 	 StateMachineEnum stateMachineEnum ;
 	 //the socket used for sending and receiving messages
@@ -28,13 +33,14 @@ public class elevatorClass {
  	 elevatorMotor motor;
  	 
  	 //The constructor, sets numFloors and inits all variables
-	 public elevatorClass(int numFloors){
+	 public elevatorClass(int numFloors, int elevatorNumber){
 		this.numFloors=numFloors; 	
+		this.elevatorNumber=elevatorNumber;
 		stateMachineEnum= StateMachineEnum.STATIONARY;
 		//currentFloor=0;
 		try {
 	        //create the datagram sockets for receiving
-	         contactSocket = new DatagramSocket(2222);
+	         contactSocket = new DatagramSocket(2222+this.elevatorNumber);
 	         
 	        
 	      } catch (SocketException se)
@@ -85,8 +91,8 @@ public class elevatorClass {
 			      // Form a String from the byte array.
 			      System.out.println(makeString(data, contactPacket.getLength()) + "\n");
 			     
-
-				  deployElevator(data[0], data[2], data[3]);
+			      //pickup, destination
+				  deployElevator(data[0], data[1]);
 			      
 			     // deployElevator(sortPacket(receivePacket.getData()));
 			      //int len = receivePacket.getLength();
@@ -97,49 +103,74 @@ public class elevatorClass {
 	
 	//deploys the elevator to a pickup location, then to the destination the user selects.
 	//Expecting heavy changes as the intent of each iteration is made more clear.
-	public void deployElevator(int pickupFloor, int destFloor, int direction) {
+	public void deployElevator(int pickupFloor, int destFloor) {
 
 		//pickup the passenger
-		gotoFloor(pickupFloor, destFloor, direction);
-		//Deliver the passenger
-		gotoFloor(destFloor, destFloor, direction);
+		gotoFloor(pickupFloor, destFloor);
+		
 
 	}
 	//Helper for the deployElevator method that goes to a floor and opens/closes the door.
-	private void gotoFloor(int finalFloor, int goalFloor, int direction) {
-		if (motor.getCurrentFloor() > finalFloor) {
+	private void gotoFloor(int finalFloor, int goalFloor) {
+		int direction=0;
+		floorsToVisit.add(finalFloor);
+		floorsToVisit.add(goalFloor);
+		Collections.sort(floorsToVisit);
+		
+		
+		if (motor.getCurrentFloor() > floorsToVisit.get(0)) {
 			stateMachineEnum = StateMachineEnum.GOING_DOWN;
-			notifyFloor(finalFloor, 0, goalFloor, 0);//notify the floor subsystem of impending arrival
-		}
-		else if (motor.getCurrentFloor() < finalFloor) {
-			stateMachineEnum = StateMachineEnum.GOING_UP;
-			notifyFloor(finalFloor, 1, goalFloor, 0);//notify the floor subsystem of impending arrival
-		}
-		else {//if youre already on the pickup floor, toggle doors
+			System.out.println("Elevator: deploying to floor " + floorsToVisit.get(0));
+			direction=0;
+			notifyFloor(floorsToVisit.get(0), direction, 0);//notify the floor subsystem of impending arrival
+			motor.move(floorsToVisit.get(0));
 			stateMachineEnum = StateMachineEnum.STATIONARY;
+			System.out.println("Elevator: Arrived at floor " + motor.getCurrentFloor());
 			doors.setDoorState(true);
 			doors.setDoorState(false);
+			notifyFloor(motor.getCurrentFloor(), direction, 1);
+			floorsToVisit.remove(0);
+		}
+		else if (motor.getCurrentFloor() < floorsToVisit.get(0)) {
+			stateMachineEnum = StateMachineEnum.GOING_UP;
+			System.out.println("Elevator: deploying to floor " + floorsToVisit.get(0));
+			direction=1;
+			notifyFloor(floorsToVisit.get(0), direction, 0);//notify the floor subsystem of impending arrival
+			motor.move(floorsToVisit.get(0));
+			stateMachineEnum = StateMachineEnum.STATIONARY;
+			System.out.println("Elevator: Arrived at floor " + motor.getCurrentFloor());
+			doors.setDoorState(true);
+			doors.setDoorState(false);
+			notifyFloor(motor.getCurrentFloor(), direction, 1);
+			floorsToVisit.remove(0);
+		}
+		else if (floorsToVisit.isEmpty()) {
+			stateMachineEnum = StateMachineEnum.STATIONARY;
+			System.out.println("Elevator : "+elevatorNumber+" is Idle on "+ motor.getCurrentFloor());
+			notifyFloor(motor.getCurrentFloor(),-1 , 1);//notify the floor subsystem of arrival(-1 for direction if elevator is stationary)
+
 		}
 		
-		System.out.println("Elevator: deploying to floor " + finalFloor);
-		motor.move(finalFloor);//move to pickup floor
 		
-		System.out.println("Elevator: Arrived at destination, floor " + finalFloor);
-		notifyFloor(finalFloor, direction, goalFloor, 1);//notify the floor subsystem of arrival
 		
-		doors.setDoorState(true);
-		doors.setDoorState(false);
+		
+		
 	}
 	//Notifies the floorSubsytem of the elevators status
-	private void notifyFloor(int floorToNotify, int direction, int destination, int status) {
+	private void notifyFloor(int floorToNotify, int direction, int status) {
 		byte[] data = new byte[5];
 	    
 	    data[0] = (byte) floorToNotify;//floornumber of floor to get notified
 	    data[1] = (byte) direction;//request direction ----- 0 = Down, 1 = Up
-	    data[2] = (byte) destination;//The final destination after getting picked up
-	    data[3] = (byte) status; //status. 0 = on the way, 1= arrived
-	    data[4] = (byte) 0; // sending this to the floor
-	    
+	    data[2] = (byte) status;//status. 0 = on the way, 1= arrived
+	    data[3] = (byte) 0; // sending this to the floor
+	    //returns 1 if the elevator is now idle 0 otherwise
+	    if (floorsToVisit.isEmpty()) {
+			data[4]=0;
+		}else {
+			data[4]=1;
+		}
+	   
 	    try {
 	          contactPacket = new DatagramPacket(data, data.length,
 	                                    InetAddress.getLocalHost(), 1111);
@@ -175,16 +206,25 @@ public class elevatorClass {
 			retVal.substring(0, retVal.length()-1);
 			return retVal;
 		}
-	 
+	 @Override
+	public void run() {
+		// TODO Auto-generated method stub
+		while (true) {
+			receiveCall();
+			
+		}
+		 
+		 
+	}
 	//when run, this will turn on the elevator and put it into an endless listening loop.
-	public static void main(String args[])
-	   {
-		 //start the program
-	      elevatorClass c = new elevatorClass(7);
-	      while (true)
-	      {
-	    	  c.receiveCall();
-	      }
-	   }
+//	public static void main(String args[])
+//	   {
+//		 //start the program
+//	      elevatorClass c = new elevatorClass(7,1);
+//	      while (true)
+//	      {
+//	    	  c.receiveCall();
+//	      }
+//	   }
 
 }
