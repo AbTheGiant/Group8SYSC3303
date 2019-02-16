@@ -6,6 +6,7 @@ import java.net.InetAddress;
 import java.net.SocketException;
 import java.net.UnknownHostException;
 import java.sql.Date;
+import java.util.ArrayList;
 import java. util. Scanner;
 
 import Common.buttonClass;
@@ -23,8 +24,8 @@ public class FloorSubsystem {
 	//this will be used when the timing is introduced in the next iteration, right now it does nothing
 	Date time;
 	//These two lamps are the directional lamp indicating which way the elevator is headed.
-	public lampsClass lampUp = new lampsClass();
-	public lampsClass lampDown = new lampsClass();
+	public ArrayList<lampsClass> lampsUp = new ArrayList<lampsClass>();
+	public ArrayList<lampsClass> lampsDown = new ArrayList<lampsClass>();
 	//This is the floornumber of the subsystem
 	int floorNumber; 
 	//this boolean is used exclusively for the iteration1 interaction i set up
@@ -48,10 +49,16 @@ public class FloorSubsystem {
 	// (send to simulator) mode
 	
 	//the constructor, initializes fields and opens socket
-	public FloorSubsystem(int floor) {
+	public FloorSubsystem(int floor, int numberOfElevators) {
 		//init fields
-		lampUp.setLamps(false);
-		lampDown.setLamps(false);
+		for (int i = 0; i < numberOfElevators; i++)
+		{
+			lampsUp.add(new lampsClass());
+			lampsDown.add(new lampsClass());
+			
+			lampsUp.get(i).setLamps(false);
+			lampsDown.get(i).setLamps(false);		
+		}
 		ButtonUp.setButton(false);
 		ButtonDown.setButton(false);
 		ButtonUpLamp.setLamps(false);
@@ -130,12 +137,12 @@ public class FloorSubsystem {
 	      //first i update the directional lamp
 	      if (data[1] == 0)
 	      {
-	    	  lampUp.setLamps(false);
-	    	  lampDown.setLamps(true);
+	    	  lampsUp.get(data[4]).setLamps(false);
+	    	  lampsDown.get(data[4]).setLamps(false);
 	      }
 	      else if (data[1] == 1) {
-	    	  lampDown.setLamps(false);
-	    	  lampUp.setLamps(true);
+	    	  lampsDown.get(data[4]).setLamps(false);
+	    	  lampsUp.get(data[4]).setLamps(false);
 
 	      }
 	      //Then I check to see if it has arrived or is on the way
@@ -227,7 +234,7 @@ public class FloorSubsystem {
 	public static void main( String args[] )
 	{
 	 
-		FloorSubsystem f1 = new FloorSubsystem(5);
+		FloorSubsystem f1 = new FloorSubsystem(5, 3);
 		f1.interact = true;
 		while(true)
 		{
@@ -236,7 +243,7 @@ public class FloorSubsystem {
 			if (f1.interact && f1.floorNumber != f1.nextFloor)
 			{
 				System.out.println("Switching subsystem to " + f1.nextFloor + ", the destination of the elevator that just came.");
-				f1 = new FloorSubsystem(f1.nextFloor);
+				f1 = new FloorSubsystem(f1.nextFloor, 3);
 			}
 		}
 	}
