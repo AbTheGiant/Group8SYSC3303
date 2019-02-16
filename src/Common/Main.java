@@ -8,9 +8,18 @@ public class Main {
 
 
 	public static void main(String[] args) {
+		System.out.println("[Main]Please wait while the system is initialized...");
 		elevatorClass[] elevators = new elevatorClass[3];
 		
 		Scheduler scheduler = new Scheduler();
+		
+		new Thread(() -> {
+			
+			while (true)
+			{
+				scheduler.sendReceive();
+			}
+		}).start();
 		
 		FloorSubsystem[] floors = new FloorSubsystem[7];
 		for (int i = 0; i < 3; i++)
@@ -103,13 +112,7 @@ public class Main {
 			}
 		}).start();
 		
-		new Thread(() -> {
-			
-			while (true)
-			{
-				scheduler.sendReceive();
-			}
-		}).start();
+
 		
 		//setsup interactive demo
 		try {
@@ -126,7 +129,7 @@ public class Main {
 			f1.receive();
 			if (f1.interact && f1.floorNumber != f1.nextFloor)
 			{
-				System.out.println("Switching subsystem to " + f1.nextFloor + ", the destination of the elevator that just came.");
+				System.out.println("[Main]Switching subsystem to " + f1.nextFloor + ", the destination of the elevator that just came.");
 				f1 = floors[f1.nextFloor];
 			}
 		}

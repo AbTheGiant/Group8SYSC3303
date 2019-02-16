@@ -84,7 +84,7 @@ public class FloorSubsystem {
 	public void send(int direction, int destination)
 	{
 		
-	    System.out.println("FloorSubsystem: Requesting Elevator to floor "+floorNumber+" to ride to floor "+destination+".\n");
+	    System.out.println("[FloorSubsystem]: Requesting Elevator to floor "+floorNumber+" to ride to floor "+destination+".\n");
 	    byte[] data = new byte[5];
 	    
 	    data[0] = (byte) floorNumber;//floornumber of subsystem/destination requested
@@ -115,10 +115,9 @@ public class FloorSubsystem {
 	public void receive() {
 	    byte data[] = new byte[100];
 	    receivePacket = new DatagramPacket(data, data.length);
-	    System.out.println("FloorSubsystem: Waiting for Packet.\n");
 	    // Waiting until a datagram packet is received from receiveSocket.
 	      try {        
-	         System.out.println("Waiting..."); // so we know we're waiting
+	         System.out.println("[FloorSubsystem "+floorNumber+"]Waiting..."); // so we know we're waiting
 	         sendReceiveSocket.receive(receivePacket);
 	      } catch (IOException e) {
 	         System.out.print("IO Exception: likely:");
@@ -127,11 +126,9 @@ public class FloorSubsystem {
 	         System.exit(1);
 	      }
 	      
-	      System.out.println("FloorSubsystem: Packet received:");
 	      int len = receivePacket.getLength();
-	      System.out.print("Containing: " );
-	      // Form a String from the byte array.
-	      System.out.println(makeString(data, len) + "\n");
+	      System.out.println("[FloorSubsystem "+floorNumber+"]: Packet received containing: " + makeString(data, len) );
+
 	      
 
 	      //first i update the directional lamp
@@ -159,14 +156,14 @@ public class FloorSubsystem {
 				ButtonDown.setButton(false);
 		      }
 		      interact = true;
-	    	  System.out.println("Elevator arrived!");
+	    	  System.out.println("[FloorSubsystem "+floorNumber+"]Elevator arrived!");
 	    	  
 	    	  nextFloor = data[2];
 	    	  
 	      }
 	      else
 	      {
-	    	  System.out.println("Elevator on the way!");
+	    	  System.out.println("[FloorSubsystem "+floorNumber+"]Elevator on the way!");
 	      }
 	}
 	
@@ -196,7 +193,7 @@ public class FloorSubsystem {
 	{
 		while (interact)
 		{
-			System.out.println("Please enter destination floor: ");
+			System.out.println("[FloorSubsystem "+floorNumber+"]:Please enter destination floor: ");
 			int n = reader.nextInt(); // Scans the next token of the input as an int.
 			if (n > floorNumber)
 			{
@@ -214,7 +211,7 @@ public class FloorSubsystem {
 			}
 			else
 			{
-				System.out.println("That is the floor you are currently on");
+				System.out.println("[FloorSubsystem "+floorNumber+"]:git cThat is the floor you are currently on");
 			}
 		}
 	}
@@ -229,23 +226,10 @@ public class FloorSubsystem {
 		retVal.substring(0, retVal.length()-1);
 		return retVal;
 	}
-	//The main inits the subsystem and then lets the user input a floor to goto and switches subsystems to that floor after the elevator 
-	//arrives at the current floor. 
+
 	public static void main( String args[] )
 	{
-	 
-		FloorSubsystem f1 = new FloorSubsystem(5, 3);
-		f1.interact = true;
-		while(true)
-		{
-			f1.iteration1Interact();
-			f1.receive();
-			if (f1.interact && f1.floorNumber != f1.nextFloor)
-			{
-				System.out.println("Switching subsystem to " + f1.nextFloor + ", the destination of the elevator that just came.");
-				f1 = new FloorSubsystem(f1.nextFloor, 3);
-			}
-		}
+
 	}
 	
 }

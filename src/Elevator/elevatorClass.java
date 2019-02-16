@@ -69,11 +69,11 @@ public class elevatorClass implements Runnable{
 		//create new datagram packet for receiving
 				byte[] data= new byte[100];
 			    contactPacket = new DatagramPacket(data, data.length);
-			    System.out.println("elevator: Waiting for packet from scheduler\n");
+			    System.out.println("[elevator "+elevatorNumber+"]: Waiting for packet from scheduler\n");
 			      
 			      // Block until a datagram packet is received from receiveSocket.
 			      try {        
-			         System.out.println("Waiting for scheduler..."); // so we know we're waiting
+			         System.out.println("[elevator "+elevatorNumber+"]:Waiting for scheduler..."); // so we know we're waiting
 			         contactSocket.receive(contactPacket);
 			      } catch (IOException e) {
 			         System.out.print("IO Exception: likely:");
@@ -83,13 +83,11 @@ public class elevatorClass implements Runnable{
 			      }
 
 			      // Process the received datagram.
-			      System.out.println("elevator: packet received :");
-			      System.out.println("From host: " + contactPacket.getAddress());
-			      System.out.println("Host port: " + contactPacket.getPort());
-			      System.out.print("Containing: " );
+			      System.out.println("[elevator "+elevatorNumber+"]: packet received :");
+			      System.out.println("[elevator "+elevatorNumber+"]:From host: " + contactPacket.getAddress() +":"+ contactPacket.getPort());
+			      System.out.println("[elevator "+elevatorNumber+"]:Containing: "+ makeString(data, contactPacket.getLength()) );
 
 			      // Form a String from the byte array.
-			      System.out.println(makeString(data, contactPacket.getLength()) + "\n");
 			     
 			      //pickup, destination
 				  deployElevator(data[0], data[1]);
@@ -120,12 +118,12 @@ public class elevatorClass implements Runnable{
 		
 		if (motor.getCurrentFloor() > floorsToVisit.get(0)) {
 			stateMachineEnum = StateMachineEnum.GOING_DOWN;
-			System.out.println("Elevator: deploying to floor " + floorsToVisit.get(0));
+			System.out.println("[elevator "+elevatorNumber+"]: deploying to floor " + floorsToVisit.get(0));
 			direction=0;
 			notifyFloor(floorsToVisit.get(0), direction, 0);//notify the floor subsystem of impending arrival
 			motor.move(floorsToVisit.get(0));
 			stateMachineEnum = StateMachineEnum.STATIONARY;
-			System.out.println("Elevator: Arrived at floor " + motor.getCurrentFloor());
+			System.out.println("[elevator "+elevatorNumber+"]: Arrived at floor " + motor.getCurrentFloor());
 			doors.setDoorState(true);
 			doors.setDoorState(false);
 			notifyFloor(motor.getCurrentFloor(), direction, 1);
@@ -133,12 +131,12 @@ public class elevatorClass implements Runnable{
 		}
 		else if (motor.getCurrentFloor() < floorsToVisit.get(0)) {
 			stateMachineEnum = StateMachineEnum.GOING_UP;
-			System.out.println("Elevator: deploying to floor " + floorsToVisit.get(0));
+			System.out.println("[elevator "+elevatorNumber+"]: deploying to floor " + floorsToVisit.get(0));
 			direction=1;
 			notifyFloor(floorsToVisit.get(0), direction, 0);//notify the floor subsystem of impending arrival
 			motor.move(floorsToVisit.get(0));
 			stateMachineEnum = StateMachineEnum.STATIONARY;
-			System.out.println("Elevator: Arrived at floor " + motor.getCurrentFloor());
+			System.out.println("[elevator "+elevatorNumber+"]: Arrived at floor " + motor.getCurrentFloor());
 			doors.setDoorState(true);
 			doors.setDoorState(false);
 			notifyFloor(motor.getCurrentFloor(), direction, 1);
@@ -146,7 +144,7 @@ public class elevatorClass implements Runnable{
 		}
 		else if (floorsToVisit.isEmpty()) {
 			stateMachineEnum = StateMachineEnum.STATIONARY;
-			System.out.println("Elevator : "+elevatorNumber+" is Idle on "+ motor.getCurrentFloor());
+			System.out.println("[elevator "+elevatorNumber+"]: "+elevatorNumber+" is Idle on "+ motor.getCurrentFloor());
 			notifyFloor(motor.getCurrentFloor(),-1 , 1);//notify the floor subsystem of arrival(-1 for direction if elevator is stationary)
 
 		}
