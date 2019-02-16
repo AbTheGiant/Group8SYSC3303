@@ -27,11 +27,11 @@ public class FloorSubsystem {
 	public ArrayList<lampsClass> lampsUp = new ArrayList<lampsClass>();
 	public ArrayList<lampsClass> lampsDown = new ArrayList<lampsClass>();
 	//This is the floornumber of the subsystem
-	int floorNumber; 
+	public int floorNumber; 
 	//this boolean is used exclusively for the iteration1 interaction i set up
-	boolean interact;
+	public boolean interact;
 	//this int is used exclusively for the iteration1 interaction i set up
-	int nextFloor;
+	public int nextFloor;
 	
 	//this will be the buttons on the wall, to call an elevator up/down. Not used in iteration1
 	buttonClass ButtonUp = new buttonClass();

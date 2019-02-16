@@ -13,11 +13,9 @@ public class Main {
 		Scheduler scheduler = new Scheduler();
 		
 		FloorSubsystem[] floors = new FloorSubsystem[7];
-		int count = 0;
-		for (elevatorClass elevator : elevators)
+		for (int i = 0; i < 3; i++)
 		{
-			elevator = new elevatorClass(7, count);
-			count++;
+			elevators[i] = new elevatorClass(7, i);
 
 		}
 		new Thread(() -> {
@@ -44,9 +42,9 @@ public class Main {
 			}
 		}).start();
 		
-		for (FloorSubsystem floor : floors)
+		for (int i = 0; i < 7; i++)
 		{
-			floor = new FloorSubsystem(7, 3);
+			floors[i] = new FloorSubsystem(i, 3);
 		}
 		
 		new Thread(() -> {
@@ -104,6 +102,34 @@ public class Main {
 				floors[6].receive();
 			}
 		}).start();
+		
+		new Thread(() -> {
+			
+			while (true)
+			{
+				scheduler.sendReceive();
+			}
+		}).start();
+		
+		//setsup interactive demo
+		try {
+			Thread.sleep(1);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		FloorSubsystem f1 = floors[6];
+		f1.interact = true;
+		while(true)
+		{
+			f1.iteration1Interact();
+			f1.receive();
+			if (f1.interact && f1.floorNumber != f1.nextFloor)
+			{
+				System.out.println("Switching subsystem to " + f1.nextFloor + ", the destination of the elevator that just came.");
+				f1 = floors[f1.nextFloor];
+			}
+		}
 		
 
 	}
