@@ -89,84 +89,46 @@ public class elevatorClass implements Runnable{
 			      // Form a String from the byte array.
 			     
 			      //pickup, destination
-				  deployElevator(data[0], data[1]);
 			      
-			     // deployElevator(sortPacket(receivePacket.getData()));
-			      //int len = receivePacket.getLength();
-			      //System.out.println("Length: " + len);
-			     // System.out.println("Containing: " +receivePacket.getData()[0]);
+				  floorsToVisit.add((int) data[2]);	
+
 
 	}
-	
-	//deploys the elevator to a pickup location, then to the destination the user selects.
-	//Expecting heavy changes as the intent of each iteration is made more clear.
-	public void deployElevator(int pickupFloor, int destFloor) {
-
-		//pickup the passenger
-		gotoFloor(pickupFloor, destFloor);
-		
-
+	private synchronized void addToVisit(int floor)
+	{
+		floorsToVisit.add(floor);
+		notifyAll();
 	}
-	//Helper for the deployElevator method that goes to a floor and opens/closes the door.
-	private void gotoFloor(int finalFloor, int goalFloor) {
-		int direction=0;
-		floorsToVisit.add(finalFloor);
-		floorsToVisit.add(goalFloor);
-		Collections.sort(floorsToVisit);
-		
-		
-		if (motor.getCurrentFloor() > floorsToVisit.get(0)) {
-			stateMachineEnum = StateMachineEnum.GOING_DOWN;
-			System.out.println("[elevator "+elevatorNumber+"]: deploying to floor " + floorsToVisit.get(0));
-			direction=0;
-			notifyFloor(floorsToVisit.get(0), direction, 0);//notify the floor subsystem of impending arrival
-			motor.move(floorsToVisit.get(0));
-			stateMachineEnum = StateMachineEnum.STATIONARY;
-			System.out.println("[elevator "+elevatorNumber+"]: Arrived at floor " + motor.getCurrentFloor());
-			doors.setDoorState(true);
-			doors.setDoorState(false);
-			notifyFloor(motor.getCurrentFloor(), direction, 1);
-			floorsToVisit.remove(0);
+	private synchronized int getNextFloor()
+	{
+		return getNextFloor();
+	}
+	private synchronized void sortFloors(boolean reverse)
+	{
+		if (!reverse)
+		{
+			Collections.sort(floorsToVisit);
 		}
-		else if (motor.getCurrentFloor() < floorsToVisit.get(0)) {
-			stateMachineEnum = StateMachineEnum.GOING_UP;
-			System.out.println("[elevator "+elevatorNumber+"]: deploying to floor " + floorsToVisit.get(0));
-			direction=1;
-			notifyFloor(floorsToVisit.get(0), direction, 0);//notify the floor subsystem of impending arrival
-			motor.move(floorsToVisit.get(0));
-			stateMachineEnum = StateMachineEnum.STATIONARY;
-			System.out.println("[elevator "+elevatorNumber+"]: Arrived at floor " + motor.getCurrentFloor());
-			doors.setDoorState(true);
-			doors.setDoorState(false);
-			notifyFloor(motor.getCurrentFloor(), direction, 1);
-			floorsToVisit.remove(0);
+		else
+		{
+			Collections.sort(floorsToVisit, Collections.reverseOrder());
 		}
-		else if (floorsToVisit.isEmpty()) {
-			stateMachineEnum = StateMachineEnum.STATIONARY;
-			System.out.println("[elevator "+elevatorNumber+"]: "+elevatorNumber+" is Idle on "+ motor.getCurrentFloor());
-			notifyFloor(motor.getCurrentFloor(),-1 , 1);//notify the floor subsystem of arrival(-1 for direction if elevator is stationary)
-
-		}
-		
-		
-		
-		
-		
 	}
 	//Notifies the floorSubsytem of the elevators status
-	private void notifyFloor(int floorToNotify, int direction, int status) {
-		byte[] data = new byte[5];
+	private void notifyScheduler(int destinationFloor, int status) {
+		byte[] data = new byte[6];
 	    
-	    data[0] = (byte) floorToNotify;//floornumber of floor to get notified
-	    data[1] = (byte) direction;//request direction ----- 0 = Down, 1 = Up
+	    data[0] = (byte) destinationFloor;//floornumber of floor headed too
+	    data[1] = (byte) stateMachineEnum.ordinal();//elevator direction ----- 0 = stationary, 1 = Up, 2 = down
 	    data[2] = (byte) status;//status. 0 = on the way, 1= arrived
-	    data[3] = (byte) 0; // sending this to the floor
-	    //returns 1 if the elevator is now idle 0 otherwise
 	    if (floorsToVisit.isEmpty()) {
-			data[4]=0;
+			data[3]=0;
 		}else {
-			data[4]=1;
+			data[3]=1;
 		}
+	    data[4] = (byte) 0; // message from elevator
+	    //returns 1 if the elevator is now idle 0 otherwise
+	    data[5] = (byte) motor.getCurrentFloor(); //Current floor of the elevator
 	   
 	    try {
 	          contactPacket = new DatagramPacket(data, data.length,
@@ -205,11 +167,70 @@ public class elevatorClass implements Runnable{
 		}
 	 @Override
 	public void run() {
-		// TODO Auto-generated method stub
-		while (true) {
-			receiveCall();
-			
-		}
+		 System.out.println("Starting Elevator");
+		 new Thread(() -> {
+				while (true) {
+					receiveCall();
+				}
+			}).start();
+		 boolean broadcast = true;
+		 while (true)
+		 {
+			 
+			 if (!floorsToVisit.isEmpty())
+			 {	
+				 Collections.sort(floorsToVisit, Collections.reverseOrder());
+	 			System.out.println("[elevator "+elevatorNumber+"]: priority floor = "+ getNextFloor());		 				
+
+				 if (motor.getCurrentFloor() > getNextFloor()){
+					 stateMachineEnum = StateMachineEnum.GOING_DOWN;
+				 }
+				 else if (motor.getCurrentFloor() < getNextFloor()) {
+					 stateMachineEnum = StateMachineEnum.GOING_UP;
+				 }
+				 else{
+					 stateMachineEnum = StateMachineEnum.STATIONARY;
+				 }
+			 }
+			 else
+			 {
+				 stateMachineEnum = StateMachineEnum.STATIONARY;
+			 }
+			 
+			 switch(stateMachineEnum)
+			 {
+			 	case STATIONARY:
+			 		if (!floorsToVisit.isEmpty() && motor.getCurrentFloor() == getNextFloor())
+			 		{
+		 				doors.setDoorState(true);
+		 				doors.setDoorState(false);
+		 				floorsToVisit.remove(0);
+		 				System.out.println("[elevator "+elevatorNumber+"]: cycled doors at "+ motor.getCurrentFloor());		 				
+			 		}
+			 		else
+			 		{
+			 			if (broadcast)
+			 			{
+			 				System.out.println("[elevator "+elevatorNumber+"]: is Idle on "+ motor.getCurrentFloor());
+			 				broadcast = false;
+			 			}
+			 		}
+			 		break;
+			 	case GOING_UP:
+			 		System.out.println("[elevator "+elevatorNumber+"]:At "+ motor.getCurrentFloor() + " enroute to floor " + getNextFloor());
+	 				notifyScheduler(getNextFloor(), 0);//notify the floor subsystem of impending arrival
+			 		motor.move(motor.getCurrentFloor() + 1);
+			 		broadcast = true;
+			 		break;
+			 	case GOING_DOWN:
+			 		System.out.println("[elevator "+elevatorNumber+"]:At "+ motor.getCurrentFloor() + " enroute to floor " + getNextFloor());
+	 				notifyScheduler(getNextFloor(), 0);//notify the floor subsystem of impending arrival
+			 		motor.move(motor.getCurrentFloor() - 1);
+			 		broadcast = true;
+			 		break;
+			 }
+		 }
+
 		 
 		 
 	}

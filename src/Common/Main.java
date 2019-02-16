@@ -27,29 +27,9 @@ public class Main {
 			elevators[i] = new elevatorClass(7, i);
 
 		}
-		new Thread(() -> {
-			
-			while (true)
-			{
-				elevators[0].receiveCall();
-			}
-		}).start();
-		
-		new Thread(() -> {
-			
-			while (true)
-			{
-				elevators[1].receiveCall();
-			}
-		}).start();
-		
-		new Thread(() -> {
-			
-			while (true)
-			{
-				elevators[2].receiveCall();
-			}
-		}).start();
+		new Thread (elevators[0]).start();
+		new Thread (elevators[1]).start();
+		new Thread (elevators[2]).start();
 		
 		for (int i = 0; i < 7; i++)
 		{
