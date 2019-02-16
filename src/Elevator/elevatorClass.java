@@ -69,7 +69,6 @@ public class elevatorClass implements Runnable{
 		//create new datagram packet for receiving
 				byte[] data= new byte[100];
 			    contactPacket = new DatagramPacket(data, data.length);
-			    System.out.println("[elevator "+elevatorNumber+"]: Waiting for packet from scheduler\n");
 			      
 			      // Block until a datagram packet is received from receiveSocket.
 			      try {        
