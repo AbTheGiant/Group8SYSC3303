@@ -13,7 +13,7 @@ public class Main {
 		System.out.println("[Main]Please wait while the system is initialized...");
 		elevatorClass[] elevators = new elevatorClass[3];
 		
-		Scheduler scheduler = new Scheduler();
+		Scheduler scheduler = new Scheduler(3);
 		
 		new Thread(() -> {
 			

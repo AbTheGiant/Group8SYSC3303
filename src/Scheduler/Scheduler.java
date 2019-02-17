@@ -7,17 +7,19 @@ import java.net.*;
 
 public class Scheduler {
 
-	//Floor variables
+	//Variables to send to the floor class
 	int elevatorDirection, elevatorCurrentLevel,elevatorStatus;
 	
 	//Variables to send to the elevator class
-	int destinationFloor, pickupFloor;
+	int destinationFloor, pickupFloor, currentElevatorNumber, elevatorDestination;
+	
+	int allElevators[][];
 	
 	DatagramPacket sendPacket, receivePacket;
 	DatagramSocket receiveSocket, SendSocket;
 	
-	public Scheduler() {
-				
+	public Scheduler(int numberOfElevatorCars) {
+				allElevators = new int [numberOfElevatorCars][5];
 	}
 	
 	public void initSockets() {
@@ -77,6 +79,27 @@ public class Scheduler {
 	      //this string is used to output to the console where the scheduler is sending packets
 	      String dest = "";
 	      //Our data[4] represents which way the data shuld flow, 1 = to Elevator, 0 = to Floor
+	      
+	      if (len == 7) {
+	          currentElevatorNumber = data[6];
+	          elevatorCurrentLevel = data [5];
+	          elevatorStatus = data[2];
+	          elevatorDirection = data [1];
+	          elevatorDestination = data [0];
+	     
+	      
+    	      for (int x = 0; x <allElevators.length; x++ ) {
+    	          if (x == currentElevatorNumber)
+    	          {
+    	              allElevators[x][0] = elevatorDestination;
+    	              allElevators[x][1] = elevatorDirection;
+    	              allElevators[x][2] = elevatorStatus;
+    	              allElevators[x][3] = elevatorCurrentLevel;
+    	              allElevators[x][4] = currentElevatorNumber;
+    	          }
+    	      }
+    	      
+	      }
 	            
 	      if(data[4] == 1) {
 	    	  dest = "Elevator"; //sending packet to the elevator
@@ -85,13 +108,19 @@ public class Scheduler {
 		      dataToElevator[1] = data [1]; //This is the direction of the Elevator 0=down, 1=up
 		      destinationFloor = dataToElevator[2] = data[2]; // this is the requested destination floor 
 		      
+		      
+		     
+		      try {
+		      currentElevatorNumber = data[6];
+		      } catch (IndexOutOfBoundsException e) {
+		          e.printStackTrace();
+		      }
+		      
 		      //Sending the floor number and elevator button to Elevator system
 		      
 		      //If the elevator is not moving
-		      if (dataToElevator[1] == 0)
 		      try {
-		          sendPacket = new DatagramPacket(dataToElevator, dataToElevator.length,
-		                                    InetAddress.getLocalHost(), 2222);
+		          sendPacket = new DatagramPacket(dataToElevator, dataToElevator.length, InetAddress.getLocalHost(), 2220+decideWhichElevator());
 		      }
 		      catch (UnknownHostException e) {
 		          e.printStackTrace();
@@ -137,6 +166,27 @@ public class Scheduler {
 	      SendSocket.close();
 	      receiveSocket.close();
 	}
+	
+	public int decideWhichElevator() {
+	    int closestToPickup = 0;
+	    int floorsInbetween;
+	    for (int[] car: allElevators) {
+	        int temp = 0;
+	        floorsInbetween = car[0] - car[3];
+	        
+	        if (car[3] == car[0] || car[1] == 0) 
+	            temp = car[4];
+	        if (floorsInbetween < 0 && car[1] ==2)
+	            temp = car[4];
+	        else if (floorsInbetween > 0 && car[1] ==1)
+                temp = car[4];
+	        closestToPickup = closestToPickup < temp ? closestToPickup : temp;
+	    }
+	    
+	    
+	    return closestToPickup;
+	}
+	
 	//A support method that converts a byte[] into a string;
 	public static String makeString(byte[] data, int length)
 	{
@@ -150,7 +200,7 @@ public class Scheduler {
 	}
 	//The main inits the scheduler and then infinitely listens for messages
 	public static void main(String[] args) {
-		Scheduler scheduler = new Scheduler ();
+		Scheduler scheduler = new Scheduler (3);
 		while (true)
 		{
 			scheduler.sendReceive();
