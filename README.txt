@@ -91,6 +91,9 @@ HOW TO RUN:
 			0 -> press enter
 		-You can do this at any time and it will always take the 2 numbers regardless of the current state of the console.
 		-There are in console instructions the first time, but they fly by to quick after the first.
+	ERRORS: Please note, our group member in charge of the scheduler could not complete it in time, so our system has the following issues
+		-elevator selection is easy to break, and not optimized
+		-selecting too many floors at once will surely give you some quirky results
 
 	Tests:
 	-Just run the .java of the test
