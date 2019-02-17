@@ -23,21 +23,21 @@ class FloorSubSystemClassTest {
 	@BeforeEach
 	void setUp() throws Exception {
 		//floor system for floor 4
-		fs = new FloorSubsystem(4);
+		fs = new FloorSubsystem(4, 3);
 		
 	}
 
 	@Test
 	void test() {
 		//checking initial values for both lamps are false
-		assertEquals(fs.lampUp.getLamps(), false);
-		assertEquals(fs.lampDown.getLamps(), false);
+		assertEquals(fs.lampsUp.get(0).getLamps(), false);
+		assertEquals(fs.lampsDown.get(0).getLamps(), false);
 		
 		//start listening on floorsubsystem which should update lamps after message is received
 		new Thread(() -> {
 		    fs.receive();
 		  //down lamp now on because of elevator direction Down (0)
-		      assertEquals(fs.lampDown.getLamps(), true);
+		      assertEquals(fs.lampsDown.get(0).getLamps(), true);
 		      
 		      System.out.println("All Tests Passed!");
 		}).start();
@@ -49,12 +49,17 @@ class FloorSubSystemClassTest {
 			e.printStackTrace();
 		}
 		
-		byte[] data = new byte[4];
+		byte[] data = new byte[7];
 	    
-	    data[0] = (byte) 4;//floornumber of floor to get notified
-	    data[1] = (byte) 0;//request direction ----- 0 = Down, 1 = Up
-	    data[2] = (byte) 2;//The final destination after getting picked up
-	    data[3] = (byte) 0; //status. 0 = on the way, 1= arrived
+	    data[0] = (byte) 4;//floornumber of floor headed too
+	    data[1] = (byte) 2;//elevator direction ----- 0 = stationary, 1 = Up, 2 = down
+	    data[2] = (byte) 0;//status. 0 = on the way, 1= arrived
+	    
+		data[3]=0;
+		
+	    data[4] = (byte) 0; // message from elevator
+	    data[5] = (byte) 6; //Current floor of the elevator
+	    data[6] = (byte) 0;
 	    
 	    
 	    //send the packet

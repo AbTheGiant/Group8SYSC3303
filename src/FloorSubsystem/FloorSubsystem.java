@@ -130,15 +130,20 @@ public class FloorSubsystem {
 	      
 
 	      //first i update the directional lamp
-	      if (data[1] == 0)
+	      if (data[1] == 1)
 	      {
-	    	  lampsUp.get(data[4]).setLamps(false);
+	    	  lampsUp.get(data[4]).setLamps(true);
 	    	  lampsDown.get(data[4]).setLamps(false);
 	      }
-	      else if (data[1] == 1) {
+	      else if (data[1] == 2) {
+	    	  lampsDown.get(data[4]).setLamps(false);
+	    	  lampsUp.get(data[4]).setLamps(true);
+
+	      }
+	      else if (data[1] == 0)
+	      {
 	    	  lampsDown.get(data[4]).setLamps(false);
 	    	  lampsUp.get(data[4]).setLamps(false);
-
 	      }
 	      //Then I check to see if it has arrived or is on the way
 	      if (data[3] == 1)
