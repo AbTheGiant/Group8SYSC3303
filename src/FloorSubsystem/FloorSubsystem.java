@@ -29,9 +29,7 @@ public class FloorSubsystem {
 	//This is the floornumber of the subsystem
 	public int floorNumber; 
 	//this boolean is used exclusively for the iteration1 interaction i set up
-	public boolean interact;
 	//this int is used exclusively for the iteration1 interaction i set up
-	public int nextFloor;
 	
 	//this will be the buttons on the wall, to call an elevator up/down. Not used in iteration1
 	buttonClass ButtonUp = new buttonClass();
@@ -155,10 +153,8 @@ public class FloorSubsystem {
 				ButtonDownLamp.setLamps(false);
 				ButtonDown.setButton(false);
 		      }
-		      interact = true;
 	    	  System.out.println("[FloorSubsystem "+floorNumber+"]Elevator arrived!");
 	    	  
-	    	  nextFloor = data[2];
 	    	  
 	      }
 	      else
@@ -187,34 +183,7 @@ public class FloorSubsystem {
 	}
 	 */
 	
-	//the following method (and scanner) are both so that the TA can easily interact with our system
-	Scanner reader = new Scanner(System.in);  // Reading from System.in
-	public void iteration1Interact()
-	{
-		while (interact)
-		{
-			System.out.println("[FloorSubsystem "+floorNumber+"]:Please enter destination floor: ");
-			int n = reader.nextInt(); // Scans the next token of the input as an int.
-			if (n > floorNumber)
-			{
-				send(1,n);
-				interact = false;
-				ButtonUp.setButton(true);
-				ButtonUpLamp.setLamps(true);
-			}
-			else if (n < floorNumber)
-			{
-				send(0,n);
-				interact = false;
-				ButtonDown.setButton(true);
-				ButtonDownLamp.setLamps(true);
-			}
-			else
-			{
-				System.out.println("[FloorSubsystem "+floorNumber+"]:git cThat is the floor you are currently on");
-			}
-		}
-	}
+	
 	//A support method that converts a byte[] into a string;
 	public static String makeString(byte[] data, int length)
 	{
