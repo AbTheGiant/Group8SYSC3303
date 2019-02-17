@@ -6,6 +6,7 @@ import java.net.InetAddress;
 import java.net.SocketException;
 import java.net.UnknownHostException;
 import java.sql.Date;
+import java.util.ArrayList;
 import java. util. Scanner;
 
 import Common.buttonClass;
@@ -23,14 +24,14 @@ public class FloorSubsystem {
 	//this will be used when the timing is introduced in the next iteration, right now it does nothing
 	Date time;
 	//These two lamps are the directional lamp indicating which way the elevator is headed.
-	public lampsClass lampUp = new lampsClass();
-	public lampsClass lampDown = new lampsClass();
+	public ArrayList<lampsClass> lampsUp = new ArrayList<lampsClass>();
+	public ArrayList<lampsClass> lampsDown = new ArrayList<lampsClass>();
 	//This is the floornumber of the subsystem
-	int floorNumber; 
+	public int floorNumber; 
 	//this boolean is used exclusively for the iteration1 interaction i set up
-	boolean interact;
+	public boolean interact;
 	//this int is used exclusively for the iteration1 interaction i set up
-	int nextFloor;
+	public int nextFloor;
 	
 	//this will be the buttons on the wall, to call an elevator up/down. Not used in iteration1
 	buttonClass ButtonUp = new buttonClass();
@@ -48,10 +49,16 @@ public class FloorSubsystem {
 	// (send to simulator) mode
 	
 	//the constructor, initializes fields and opens socket
-	public FloorSubsystem(int floor) {
+	public FloorSubsystem(int floor, int numberOfElevators) {
 		//init fields
-		lampUp.setLamps(false);
-		lampDown.setLamps(false);
+		for (int i = 0; i < numberOfElevators; i++)
+		{
+			lampsUp.add(new lampsClass());
+			lampsDown.add(new lampsClass());
+			
+			lampsUp.get(i).setLamps(false);
+			lampsDown.get(i).setLamps(false);		
+		}
 		ButtonUp.setButton(false);
 		ButtonDown.setButton(false);
 		ButtonUpLamp.setLamps(false);
@@ -77,11 +84,11 @@ public class FloorSubsystem {
 	public void send(int direction, int destination)
 	{
 		
-	    System.out.println("FloorSubsystem: Requesting Elevator to floor "+floorNumber+" to ride to floor "+destination+".\n");
+	    System.out.println("[FloorSubsystem]: Requesting Elevator to floor "+floorNumber+" to ride to floor "+destination+".\n");
 	    byte[] data = new byte[5];
 	    
 	    data[0] = (byte) floorNumber;//floornumber of subsystem/destination requested
-	    data[1] = (byte) direction;//request direction ----- 0 = Down, 1 = Up
+	    data[1] = (byte) direction;//request direction ----- 0 = Stationary, 1 = Up, 2 = Down
 	    data[2] = (byte) destination;//The final destination after getting picked up
 	    data[3] = (byte) 0;//leaving extra space for future endeavors
 	    data[4] = (byte) 1; // sending this to the elevator, 1= elevator, 0=floor subsystem 
@@ -108,10 +115,9 @@ public class FloorSubsystem {
 	public void receive() {
 	    byte data[] = new byte[100];
 	    receivePacket = new DatagramPacket(data, data.length);
-	    System.out.println("FloorSubsystem: Waiting for Packet.\n");
 	    // Waiting until a datagram packet is received from receiveSocket.
 	      try {        
-	         System.out.println("Waiting..."); // so we know we're waiting
+	         System.out.println("[FloorSubsystem "+floorNumber+"]Waiting..."); // so we know we're waiting
 	         sendReceiveSocket.receive(receivePacket);
 	      } catch (IOException e) {
 	         System.out.print("IO Exception: likely:");
@@ -120,22 +126,20 @@ public class FloorSubsystem {
 	         System.exit(1);
 	      }
 	      
-	      System.out.println("FloorSubsystem: Packet received:");
 	      int len = receivePacket.getLength();
-	      System.out.print("Containing: " );
-	      // Form a String from the byte array.
-	      System.out.println(makeString(data, len) + "\n");
+	      System.out.println("[FloorSubsystem "+floorNumber+"]: Packet received containing: " + makeString(data, len) );
+
 	      
 
 	      //first i update the directional lamp
 	      if (data[1] == 0)
 	      {
-	    	  lampUp.setLamps(false);
-	    	  lampDown.setLamps(true);
+	    	  lampsUp.get(data[4]).setLamps(false);
+	    	  lampsDown.get(data[4]).setLamps(false);
 	      }
 	      else if (data[1] == 1) {
-	    	  lampDown.setLamps(false);
-	    	  lampUp.setLamps(true);
+	    	  lampsDown.get(data[4]).setLamps(false);
+	    	  lampsUp.get(data[4]).setLamps(false);
 
 	      }
 	      //Then I check to see if it has arrived or is on the way
@@ -152,14 +156,14 @@ public class FloorSubsystem {
 				ButtonDown.setButton(false);
 		      }
 		      interact = true;
-	    	  System.out.println("Elevator arrived!");
+	    	  System.out.println("[FloorSubsystem "+floorNumber+"]Elevator arrived!");
 	    	  
 	    	  nextFloor = data[2];
 	    	  
 	      }
 	      else
 	      {
-	    	  System.out.println("Elevator on the way!");
+	    	  System.out.println("[FloorSubsystem "+floorNumber+"]Elevator on the way!");
 	      }
 	}
 	
@@ -189,7 +193,7 @@ public class FloorSubsystem {
 	{
 		while (interact)
 		{
-			System.out.println("Please enter destination floor: ");
+			System.out.println("[FloorSubsystem "+floorNumber+"]:Please enter destination floor: ");
 			int n = reader.nextInt(); // Scans the next token of the input as an int.
 			if (n > floorNumber)
 			{
@@ -207,7 +211,7 @@ public class FloorSubsystem {
 			}
 			else
 			{
-				System.out.println("That is the floor you are currently on");
+				System.out.println("[FloorSubsystem "+floorNumber+"]:git cThat is the floor you are currently on");
 			}
 		}
 	}
@@ -222,23 +226,10 @@ public class FloorSubsystem {
 		retVal.substring(0, retVal.length()-1);
 		return retVal;
 	}
-	//The main inits the subsystem and then lets the user input a floor to goto and switches subsystems to that floor after the elevator 
-	//arrives at the current floor. 
+
 	public static void main( String args[] )
 	{
-	 
-		FloorSubsystem f1 = new FloorSubsystem(5);
-		f1.interact = true;
-		while(true)
-		{
-			f1.iteration1Interact();
-			f1.receive();
-			if (f1.interact && f1.floorNumber != f1.nextFloor)
-			{
-				System.out.println("Switching subsystem to " + f1.nextFloor + ", the destination of the elevator that just came.");
-				f1 = new FloorSubsystem(f1.nextFloor);
-			}
-		}
+
 	}
 	
 }
