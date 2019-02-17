@@ -125,7 +125,7 @@ public class FloorSubsystem {
 	      }
 	      
 	      int len = receivePacket.getLength();
-	      System.out.println("[FloorSubsystem "+floorNumber+"]: Packet received containing: " + makeString(data, len) );
+	      System.out.println("[FloorSubsystem " + floorNumber + "]: Packet received containing: " + makeString(data, len) );
 
 	      
 

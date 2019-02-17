@@ -8,6 +8,7 @@ import java.net.SocketException;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 
 import Common.*;
 
@@ -40,7 +41,7 @@ public class elevatorClass implements Runnable{
 		//currentFloor=0;
 		try {
 	        //create the datagram sockets for receiving
-	         contactSocket = new DatagramSocket(2222+this.elevatorNumber);
+	         contactSocket = new DatagramSocket(2220+this.elevatorNumber);
 	         
 	        
 	      } catch (SocketException se)
@@ -102,27 +103,27 @@ public class elevatorClass implements Runnable{
 			if (floor > motor.getCurrentFloor())
 			{
 				
-				floorsToVisit.sort(Collections.reverseOrder());			
+				floorsToVisit.sort(Comparator.naturalOrder());			
 				stateMachineEnum = StateMachineEnum.GOING_UP;
 
 			}
 			else if (floor < motor.getCurrentFloor())
 			{
-				floorsToVisit.sort(null);
+				floorsToVisit.sort(Comparator.reverseOrder());
 				stateMachineEnum = StateMachineEnum.GOING_DOWN;
 			}
 			else
 			{
-				floorsToVisit.sort(null);
+				floorsToVisit.sort(Comparator.naturalOrder());
 			}
 		}
 		else if (stateMachineEnum == StateMachineEnum.GOING_UP)
 		{
-			floorsToVisit.sort(Collections.reverseOrder());
+			floorsToVisit.sort(Comparator.naturalOrder());
 		}
 		else 
 		{
-			floorsToVisit.sort(null);
+			floorsToVisit.sort(Comparator.reverseOrder());
 		}
 		
 	}
