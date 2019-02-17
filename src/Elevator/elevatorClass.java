@@ -89,7 +89,6 @@ public class elevatorClass implements Runnable{
 			      // Form a String from the byte array.
 			     
 			      //pickup, destination
-			      System.out.println("[elevator "+elevatorNumber+"]: adding floor " + data[2]);
 				  addToVisit((int) data[2]);	
 
 
@@ -232,9 +231,8 @@ public class elevatorClass implements Runnable{
 			 		}
 			 		else
 			 		{
-			 			if (broadcast <= 0)
+			 			if (broadcast == 0)
 			 			{
-			 				System.out.println("[elevator "+elevatorNumber+"]: is Idle on "+ motor.getCurrentFloor());
 			 				broadcast = 10;
 			 			}
 			 			else

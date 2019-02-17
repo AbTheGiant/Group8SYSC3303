@@ -88,7 +88,7 @@ public class FloorSubsystem {
 	    byte[] data = new byte[5];
 	    
 	    data[0] = (byte) floorNumber;//floornumber of subsystem/destination requested
-	    data[1] = (byte) direction;//request direction ----- 0 = Down, 1 = Up
+	    data[1] = (byte) direction;//request direction ----- 0 = Stationary, 1 = Up, 2 = Down
 	    data[2] = (byte) destination;//The final destination after getting picked up
 	    data[3] = (byte) 0;//leaving extra space for future endeavors
 	    data[4] = (byte) 1; // sending this to the elevator, 1= elevator, 0=floor subsystem 
