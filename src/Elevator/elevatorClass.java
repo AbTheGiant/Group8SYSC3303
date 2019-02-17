@@ -214,7 +214,7 @@ public class elevatorClass implements Runnable{
 			 			stateMachineEnum = StateMachineEnum.GOING_DOWN;
 			 		}
 			 	}
-
+		 		int arrived = 0;
 			 switch(stateMachineEnum)
 			 {
 
@@ -250,23 +250,28 @@ public class elevatorClass implements Runnable{
 			 		break;
 			 	case GOING_UP:
 			 		System.out.println("[elevator "+elevatorNumber+"]:At "+ motor.getCurrentFloor() + " enroute to floor " + getNextFloor());
-	 				notifyScheduler(getNextFloor(), 0);//notify the floor subsystem of impending arrival
 			 		motor.move(motor.getCurrentFloor() + 1);
 			 		broadcast = 0;
 			 		if (getNextFloor() == motor.getCurrentFloor())
 			 		{
 			 			stateMachineEnum = StateMachineEnum.STATIONARY;
+			 			arrived = 1;
 			 		}
+	 				notifyScheduler(getNextFloor(), arrived);//notify the floor subsystem of impending arrival
+
 			 		break;
 			 	case GOING_DOWN:
 			 		System.out.println("[elevator "+elevatorNumber+"]:At "+ motor.getCurrentFloor() + " enroute to floor " + getNextFloor());
-	 				notifyScheduler(getNextFloor(), 0);//notify the floor subsystem of impending arrival
 			 		motor.move(motor.getCurrentFloor() - 1);
 			 		broadcast = 0;
+			 	    arrived = 0;
 			 		if (getNextFloor() == motor.getCurrentFloor())
 			 		{
 			 			stateMachineEnum = StateMachineEnum.STATIONARY;
+			 			arrived = 1;
 			 		}
+	 				notifyScheduler(getNextFloor(), arrived);//notify the floor subsystem of impending arrival
+
 			 		break;
 			 }
 		 }
