@@ -27,9 +27,12 @@ public class Main {
 			elevators[i] = new elevatorClass(7, i);
 
 		}
-		new Thread (elevators[0]).start();
-		new Thread (elevators[1]).start();
-		new Thread (elevators[2]).start();
+		Thread e1 = new Thread (elevators[0]);
+		e1.start();
+		Thread e2 = new Thread (elevators[1]);
+		e2.start();
+		Thread e3 = new Thread (elevators[2]);
+		e3.start();
 		
 		for (int i = 0; i < 7; i++)
 		{
