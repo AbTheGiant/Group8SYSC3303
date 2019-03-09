@@ -12,6 +12,7 @@ import java. util. Scanner;
 import Common.buttonClass;
 import Common.lampsClass;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 
 
@@ -19,8 +20,7 @@ import java.util.Scanner;
 
 
 
-public class FloorSubsystem {
-	
+public class FloorSubsystem {	
 	//this will be used when the timing is introduced in the next iteration, right now it does nothing
 	Date time;
 	//These two lamps are the directional lamp indicating which way the elevator is headed.
@@ -79,17 +79,22 @@ public class FloorSubsystem {
 	//this sends a pickup request along with the requested destination, design will change as we pass through each iteration
 	//it was unclear how the floor the elevator should goto gets handled this iteration, so I decided to let the floor subsytem 
 	//do it since apparently it will be doing so in the future when it reads from a text file.
-	public void send(int direction, int destination)
+	public void send(int direction, int destination, String timeStamp)
 	{
 		
 	    System.out.println("[FloorSubsystem]: Requesting Elevator to floor "+floorNumber+" to ride to floor "+destination+".\n");
-	    byte[] data = new byte[5];
+	    byte[] data = new byte[4];
 	    
-	    data[0] = (byte) floorNumber;//floornumber of subsystem/destination requested
-	    data[1] = (byte) direction;//request direction ----- 0 = Stationary, 1 = Up, 2 = Down
-	    data[2] = (byte) destination;//The final destination after getting picked up
-	    data[3] = (byte) 0;//leaving extra space for future endeavors
-	    data[4] = (byte) 1; // sending this to the elevator, 1= elevator, 0=floor subsystem 
+	    data[0] = (byte) 1;//SENDER [who this packet came from, 0 = elevator, ***1 = FLOOR SUBSYSTEM***]
+	    data[1] = (byte) floorNumber;//PICKUP FLOOR [the floor number to pickup the passenger]
+	    data[2] = (byte) direction;//DIRECTION [The direction the elevator will go AFTER reaching the pickup 1 = Up, 2 = down]
+	    data[3] = (byte) destination;//DESTINATION FLOOR [the floor the elevator must stop at to drop off its passenger]
+	    
+	    data[4] = (byte) Integer.parseInt(timeStamp.split(":")[0]);//hours
+	    data[5] = (byte) Integer.parseInt(timeStamp.split(":")[1]);//minutes
+	    data[6] = (byte) Integer.parseInt(timeStamp.split(":")[2]);//seconds
+	    data[7] = (byte) Integer.parseInt(timeStamp.split(":")[3]);//Last byte of the milliseconds
+	    data[8] = (byte) Integer.parseInt(timeStamp.split(":")[3]);//second last byte of the milliseconds
 	    
 	    //send the packet
 	    try {

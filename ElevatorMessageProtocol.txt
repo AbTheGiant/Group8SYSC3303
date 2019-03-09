@@ -1,0 +1,45 @@
+Elevator Message Protocol (EMP)
+author: Kyle Smith
+
+The purpose of this document is to outline the format of messages between our three sub systems for easy reference
+
+The Elevator:
+	SENDS: 
+		BYTE 0: SENDER [who this packet came from, ***0 = ELEVATOR***, 1 = floor subsystem]
+		BYTE 1: ELEVATOR NUMBER [The elevator number, elevator 0, 1 or 2]
+		BYTE 2: STATE [0 = stationary, 1 = Up, 2 = down, 3 = openingDoors, 4 = open, 5 = closingDoors]
+		BYTE 3: CURRENT FLOOR [an int representing the floor ] 
+	RECEIVES:
+		BYTE 0: COMMAND [0 = go stationary, 1 =go Up, 2 =go down, 3 = open doors at current floor]
+
+The Floor Subsystem	
+	SENDS:  
+		BYTE 0: SENDER [who this packet came from, 0 = elevator, ***1 = FLOOR SUBSYSTEM***]
+		BYTE 1: PICKUP FLOOR [the floor number to pickup the passenger]
+		BYTE 2: DIRECTION [The direction the elevator will go AFTER reaching the pickup 1 = Up, 2 = down]
+		BYTE 3: DESTINATION FLOOR [the floor the elevator must stop at to drop off its passenger]
+		BYTE 4: TIMESTAMP  [IMPLEMENTATION TO BE DETERMINED, MIGHT NEED TO BE TWO BYTES OR MORE]	
+	RECEIVES:
+		BYTE 0: ELEVATOR NUMBER [The elevator number you're informing the subsystem of, elevator 0, 1 or 2]
+		BYTE 1: STATE [state of the elevator, ONLY SEND 0 = stationary, 1 = Up, 2 = down, during states 3/4/5 = 0/1/2 depending on next state]
+		BYTE 2: CURRENT FLOOR [the floor of the elevator you're informing the subsystem of, 0-6]
+
+The Scheduler
+	This class will be responsible for sending the packets the other two classes receive. Here is the breakdown
+	of when it should send the messages / how to determine what to send.
+	
+	Rules
+		1: Must update each floor when a direction change occurs in an elevator, or it goes stationary
+		2: Must decide which elevator to deploy to a pickup based on status of elevators/passenger count
+		3: Must always respond to the elevator messages, giving it a command. EXCEPT FOR STATES 3,4,5
+		4: Must ensure the virtual elevators are synced with actual elevators.
+	Algorithm:
+		BEST = STATIONARY
+		2nd = DOESNT REQUIRE DIRECTION CHANGE, ALREADY ABOVE/BELOW pickup and destination is BELOW/ABOVE respectively.
+		3rd = headed past pickup floor, before heading in the correct direction I.E. Headed up to pick someone going down, 
+			when a lower floor requesting going down is made
+		4th = REQUIRES DIRECTION CHANGE OR RE-MAPPING I.E. Headed up to pick someone going down, when a higher floor 
+			requesting going down happens so you can move the previous pickup to the down queue, and the new highest
+			floor to the up queue. or the same case but opposite directions		
+		5th= least favourable = Headed in the same direction as request, but not along path I.E. at floor 4 headed down, when floor 6 requests going down
+			MUST EMPTY QUEUE ENTIRELY TO PICK UP THE PERSON. IF THERE ARE MULTIPLE IN THIS CASE, PICK THE ONE CLOSEST TO COMPLETING IT'S QUEUE
