@@ -16,7 +16,6 @@ public class elevatorClass implements Runnable{
 	//the number of floors the elevator services
 	 int numFloors,elevatorNumber;
 	 
-	ArrayList<Integer> floorsToVisit= new ArrayList<Integer>();
 	
 	 //the enum holding the state of the elevator
 	 StateMachineEnum stateMachineEnum ;
@@ -65,7 +64,7 @@ public class elevatorClass implements Runnable{
 	 }
 
 	
-	public void receiveCall() {
+	public int receiveCall() {
 		
 		//create new datagram packet for receiving
 				byte[] data= new byte[100];
@@ -90,71 +89,42 @@ public class elevatorClass implements Runnable{
 			      // Form a String from the byte array.
 			     
 			      //pickup, destination
-				  addToVisit((int) data[2]);	
+				  return (int) data[0];	
 
 
 	}
-	private synchronized void addToVisit(int floor)
+	private synchronized void executeCommand(int command)
 	{
-		floorsToVisit.add(floor);
-		if (stateMachineEnum == StateMachineEnum.STATIONARY)
-		{
-			
-			if (floor > motor.getCurrentFloor())
-			{
-				
-				floorsToVisit.sort(Comparator.naturalOrder());			
-				stateMachineEnum = StateMachineEnum.GOING_UP;
-
-			}
-			else if (floor < motor.getCurrentFloor())
-			{
-				floorsToVisit.sort(Comparator.reverseOrder());
-				stateMachineEnum = StateMachineEnum.GOING_DOWN;
-			}
-			else
-			{
-				floorsToVisit.sort(Comparator.naturalOrder());
-			}
-		}
-		else if (stateMachineEnum == StateMachineEnum.GOING_UP)
-		{
-			floorsToVisit.sort(Comparator.naturalOrder());
-		}
-		else 
-		{
-			floorsToVisit.sort(Comparator.reverseOrder());
+		
+		switch (command) {
+		case 0:
+			stateMachineEnum = StateMachineEnum.STATIONARY;
+			break;
+		case 1:
+			stateMachineEnum = StateMachineEnum.GOING_UP;
+			break;
+		case 2:
+			stateMachineEnum = StateMachineEnum.GOING_DOWN;
+			break;
+		case 3:
+			stateMachineEnum = StateMachineEnum.OPENING_DOORS;
+			break;
+		default:
+			break;
 		}
 		
+		
 	}
-	private synchronized void removeFloor(int index)
-	{
-		floorsToVisit.remove(index);
-		if (floorsToVisit.isEmpty())
-		{
-			stateMachineEnum = StateMachineEnum.STATIONARY;
-		}
-	}
-	private synchronized int getNextFloor()
-	{
-		return floorsToVisit.get(0);
-	}
+	
 	//Notifies the floorSubsytem of the elevators status
-	private void notifyScheduler(int destinationFloor, int status) {
-		byte[] data = new byte[7];
+	private void notifyScheduler(int subsystem,int elevatorNumber,int state,int currentFloor) {
+		byte[] data = new byte[4];
 	    
-	    data[0] = (byte) destinationFloor;//floornumber of floor headed too
-	    data[1] = (byte) stateMachineEnum.ordinal();//elevator direction ----- 0 = stationary, 1 = Up, 2 = down
-	    data[2] = (byte) status;//status. 0 = on the way, 1= arrived
-	    if (floorsToVisit.isEmpty()) {
-			data[3]=0;
-		}else {
-			data[3]=1;
-		}
-	    data[4] = (byte) 0; // message from elevator
-	    //returns 1 if the elevator is now idle 0 otherwise
-	    data[5] = (byte) motor.getCurrentFloor(); //Current floor of the elevator
-	    data[6] = (byte) elevatorNumber;
+	    data[0] = (byte)subsystem;
+	    data[1] = (byte)elevatorNumber;//elevator number
+	    data[2] = (byte) state;//state. 0 = stationary, 1 = Up, 2 = down, 3 = openingDoors, 4 = open, 5 = closingDoors
+	    data[3]=(byte)currentFloor;//current elevator floor
+	  
 	    
 	    try {
 	          contactPacket = new DatagramPacket(data, data.length,
@@ -200,80 +170,39 @@ public class elevatorClass implements Runnable{
 				}
 			});
 		 receiving.start();
-		 int broadcast = 0;
 		 while (true)
 		 {		
-			 	if (!floorsToVisit.isEmpty())
-			 	{
-			 		if (getNextFloor() > motor.getCurrentFloor())
-			 		{
-			 			stateMachineEnum = StateMachineEnum.GOING_UP;
-			 		}
-			 		else if (getNextFloor() < motor.getCurrentFloor())
-			 		{
-			 			stateMachineEnum = StateMachineEnum.GOING_DOWN;
-			 		}
-			 	}
-		 		int arrived = 0;
+			 	
 			 switch(stateMachineEnum)
 			 {
 
 			 	case STATIONARY:
-			 		if (!floorsToVisit.isEmpty() && motor.getCurrentFloor() == getNextFloor())
-			 		{
-		 				doors.setDoorState(true);
-		 				doors.setDoorState(false);
-		 				removeFloor(0);
-		 				 if (floorsToVisit.isEmpty())
-		 				 {
-		 					 stateMachineEnum = StateMachineEnum.STATIONARY;
-		 				 }
-		 				System.out.println("[elevator "+elevatorNumber+"]: cycled doors at "+ motor.getCurrentFloor());		 				
-			 		}
-			 		else
-			 		{
-			 			if (broadcast == 0)
-			 			{
-			 				broadcast = 10;
-			 			}
-			 			else
-			 			{
-			 				broadcast--;
-			 				try {
-								Thread.sleep(1000);
-							} catch (InterruptedException e) {
-								// TODO Auto-generated catch block
-								e.printStackTrace();
-							}
-			 			}
-			 		}
+			 		System.out.println("[elevator "+elevatorNumber+"]:At "+ motor.getCurrentFloor() + " is stationary ");
+	 				notifyScheduler(0,elevatorNumber,0,motor.getCurrentFloor());//notify the scheduler of current state
+
 			 		break;
 			 	case GOING_UP:
-			 		System.out.println("[elevator "+elevatorNumber+"]:At "+ motor.getCurrentFloor() + " enroute to floor " + getNextFloor());
+			 		System.out.println("[elevator "+elevatorNumber+"]:At "+ motor.getCurrentFloor() + " enroute to floor ");
+			 		
 			 		motor.move(motor.getCurrentFloor() + 1);
-			 		broadcast = 0;
-			 		if (getNextFloor() == motor.getCurrentFloor())
-			 		{
-			 			stateMachineEnum = StateMachineEnum.STATIONARY;
-			 			arrived = 1;
-			 		}
-	 				notifyScheduler(getNextFloor(), arrived);//notify the floor subsystem of impending arrival
-
+	 				notifyScheduler(0,elevatorNumber,1,motor.getCurrentFloor());//notify the scheduler subsystem of impending arrival
 			 		break;
 			 	case GOING_DOWN:
-			 		System.out.println("[elevator "+elevatorNumber+"]:At "+ motor.getCurrentFloor() + " enroute to floor " + getNextFloor());
+			 		System.out.println("[elevator "+elevatorNumber+"]:At "+ motor.getCurrentFloor() + " enroute to floor ");
 			 		motor.move(motor.getCurrentFloor() - 1);
-			 		broadcast = 0;
-			 	    arrived = 0;
-			 		if (getNextFloor() == motor.getCurrentFloor())
-			 		{
-			 			stateMachineEnum = StateMachineEnum.STATIONARY;
-			 			arrived = 1;
-			 		}
-	 				notifyScheduler(getNextFloor(), arrived);//notify the floor subsystem of impending arrival
-
+	 				notifyScheduler(0,elevatorNumber,2,motor.getCurrentFloor());//notify the scheduler subsystem of impending arrival
+			 		break;
+			 	case OPENING_DOORS:
+			 		System.out.println("[elevator "+elevatorNumber+"]:At "+ motor.getCurrentFloor() + " Cycling Doors ");
+			 		doors.setDoorState(true);
+			 		stateMachineEnum=StateMachineEnum.DOORS_OPEN;
+	 				notifyScheduler(0,elevatorNumber,3,motor.getCurrentFloor());//notify the scheduler subsystem of impending arrival
+			 		doors.setDoorState(false);
+			 		stateMachineEnum=StateMachineEnum.CLOSING_DOORS;
+	 				notifyScheduler(0,elevatorNumber,5,motor.getCurrentFloor());//notify the scheduler subsystem of impending arrival
 			 		break;
 			 }
+			 executeCommand(receiveCall());
 		 }
 
 		 

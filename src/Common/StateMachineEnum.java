@@ -5,7 +5,10 @@ public enum StateMachineEnum {
 
 	STATIONARY,
 	GOING_UP,
-	GOING_DOWN;
+	GOING_DOWN,
+	OPENING_DOORS,
+	DOORS_OPEN,
+	CLOSING_DOORS;
 	
 	
 }
