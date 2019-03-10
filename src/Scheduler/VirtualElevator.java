@@ -6,11 +6,11 @@ import java.util.Queue;
 public class VirtualElevator {
 	
 	private int currentFloor,serviceDirection,state,elevatorNumber,timeStamp;
-	public ArrayList<Integer> elevatorList;
+	public ArrayList<Integer> floorsToVisit;
 	
 	public VirtualElevator(int floor) {
 		currentFloor = floor;
-		elevatorList = new ArrayList<Integer>();
+		floorsToVisit = new ArrayList<Integer>();
 	}
 	
 	//SETTER METHODS

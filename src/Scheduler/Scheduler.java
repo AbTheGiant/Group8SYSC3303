@@ -10,10 +10,10 @@ import java.util.Queue;
 public class Scheduler {
 
     //Variables to send to the floor class
-    int elevatorDirection, elevatorCurrentLevel,elevatorStatus;
+    int elevatorDirection, elevatorCurrentLevel, elevatorStatus;
     
     //Variables to send to the elevator class
-    int  currentElevatorNumber, elevatorDestination;
+    int  currentElevatorNumber, elevatorDestination, numFloors;
     
     VirtualElevator[] virtualElevators;
     ArrayList<ServiceRequest> elevatorServiceRequests;
@@ -21,7 +21,8 @@ public class Scheduler {
     DatagramPacket sendPacket, receivePacket;
     DatagramSocket receiveSocket, SendSocket;
     
-    public Scheduler(int numberOfElevatorCars) {
+    public Scheduler(int numberOfElevatorCars, int numberOfFloors) {
+    	numFloors = numberOfFloors;
 		for(int i = 0; i < numberOfElevatorCars; i++) {
 			virtualElevators[i] = new VirtualElevator(i);
 		}
@@ -51,7 +52,7 @@ public class Scheduler {
           } 
         
     }
-
+    //Main function that determines behaviour
     public void sendReceive() {
         
         initSockets();
@@ -75,39 +76,108 @@ public class Scheduler {
           
           
           if(data[0] == 1) {   
-              sendToElevator(data);
+              handleFloorMessage(data);           
           }
           else if(data[0] == 0) {
-              sendToFloor(data);
+              int elevatorNum = handleElevatorMessage(data);
+              notifyFloors(elevatorNum);
+              commandElevator(elevatorNum);
           }
        
-          try {
-                SendSocket.send(sendPacket);
-              } catch (IOException e) {
-                 e.printStackTrace();
-                 System.exit(1);
-              }
-        
-          SendSocket.close();
+          checkServiceRequest();
+            
+
           receiveSocket.close();
     }
-
-	private int sendToElevator(byte[] data) {
-		  byte [] dataToElevator = new byte [3];
-		  	  
-		  elevatorServiceRequests.add(new ServiceRequest(data[1],data[3],data[2]));
-		
-
+    //Notifies every floor of the elevators status 
+    private void notifyFloors(int elevatorNumber)
+    {
+    	initSockets();
+    	for (int i  = 0; i < numFloors; i++)
+    	{
+		  byte [] dataToFloor = new byte [4];
+		  dataToFloor[0] = (byte) virtualElevators[elevatorNumber].getElevatorNumber();
+		  dataToFloor[1] = (byte) virtualElevators[elevatorNumber].getServiceDirection();
+		  dataToFloor[2] = (byte) virtualElevators[elevatorNumber].getCurrentFloor();
+		  
+		  if (virtualElevators[elevatorNumber].getState() > 2 && virtualElevators[i].getCurrentFloor() == i)
+		  {
+			  dataToFloor[3] = 1;
+		  }
+		  else
+		  {
+			  dataToFloor[3] = 0;
+		  }	  		  
+		  //Sending the elevator info to the floor 
 		  try {
-		      sendPacket = new DatagramPacket(dataToElevator, dataToElevator.length, InetAddress.getLocalHost(), 2220+decideWhichElevator(data[1] ,data[0]));
+		      sendPacket = new DatagramPacket(dataToFloor, dataToFloor.length,InetAddress.getLocalHost(),3330 + i);
+		      SendSocket.send(sendPacket);
 		  }
 		  catch (UnknownHostException e) {
 		      e.printStackTrace();
 		      System.exit(1);
-		   }
-		  return 0;
-	}
+		  }
+		  catch (IOException e) {
+	             e.printStackTrace();
+	             System.exit(1);
+	       }
+		  
+    	}
+      SendSocket.close();
+    }
     
+    private void commandElevator(int elevatorNum)
+    {
+    	byte[] dataToElevator = new byte[1];
+    	
+    	if (virtualElevators[elevatorNum].floorsToVisit.size() == 0)
+    	{
+    		dataToElevator[0] = (byte) 0;
+    	}
+    	else if (virtualElevators[elevatorNum].getCurrentFloor() < virtualElevators[elevatorNum].floorsToVisit.get(0))
+    	{
+    		dataToElevator[0] = (byte) 1;
+    	}
+    	else if (virtualElevators[elevatorNum].getCurrentFloor() > virtualElevators[elevatorNum].floorsToVisit.get(0))
+    	{
+    		dataToElevator[0] = (byte) 2;
+    	}
+    	else if (virtualElevators[elevatorNum].getCurrentFloor() == virtualElevators[elevatorNum].floorsToVisit.get(0))
+    	{
+    		dataToElevator[0] = (byte) 3;
+    	}
+
+		  //Sending the elevator a command
+		  try {
+		      sendPacket = new DatagramPacket(dataToElevator, dataToElevator.length,InetAddress.getLocalHost(),2220 + elevatorNum);
+		      SendSocket.send(sendPacket);
+		  }
+		  catch (UnknownHostException e) {
+		      e.printStackTrace();
+		      System.exit(1);
+		  }
+		  catch (IOException e) {
+	             e.printStackTrace();
+	             System.exit(1);
+	      }
+    }
+    
+    
+    //Handles the message from the floor
+	private void handleFloorMessage(byte[] data) {	  
+		  elevatorServiceRequests.add(new ServiceRequest(data[1],data[3],data[2]));
+	}
+	//Handles the message from the elevator
+	private int handleElevatorMessage(byte[] data) {
+		  int x = data[1];
+   
+		  virtualElevators[x].setServiceDirection(data[2]);
+		  virtualElevators[x].setState(data[2]);
+		  virtualElevators[x].setCurrentFloor(data[3]);
+      
+		  return x;
+	}
+	//Checks if any of the pending service requests are servicable
 	public void checkServiceRequest() {
 		int bestCase = 10;
 		int bestElevator = 0;
@@ -136,40 +206,29 @@ public class Scheduler {
 			  }
 			  //if the elevator is stationary
 			  else if((bestCase > 3) && virtualElevators[i].getState() == 0) {
-				 bestCase = 2;
+				 bestCase = 3;
 				 bestElevator = i;
 			  }
 		  }
 		}
+		
+		if (bestCase == 1)
+		{
+			
+		}
+		else if (bestCase == 2)
+		{
+			
+		}
+		else if (bestCase == 3)
+		{
+			
+		}
+		else if (bestCase > 3)
+		{
+			
+		}
 	}
-	
-    /**
-     * Sends Data to the Floor Subsystem
-     * @param data
-     */
-	private void sendToFloor(byte[] data) {
-		  int x = data[1];
-   
-		  virtualElevators[x].setServiceDirection(data[2]);
-		  virtualElevators[x].setState(data[2]);
-		  virtualElevators[x].setCurrentFloor(data[3]);
-      
-		  byte [] dataToFloor = new byte [3];
-		  dataToFloor[0] = (byte) virtualElevators[x].getElevatorNumber();
-		  dataToFloor[1] = (byte) virtualElevators[x].getServiceDirection();
-		  dataToFloor[2] = (byte) virtualElevators[x].getCurrentFloor();
-		  
-		  //Sending the floor number and floor direction
-		  try {
-		      sendPacket = new DatagramPacket(dataToFloor, dataToFloor.length,InetAddress.getLocalHost(),3330 + data[4]);
-		  }
-		  catch (UnknownHostException e) {
-		      e.printStackTrace();
-		      System.exit(1);
-		   }
-	}
-	
- 
     //A support method that converts a byte[] into a string;
     public static String makeString(byte[] data, int length)
     {
