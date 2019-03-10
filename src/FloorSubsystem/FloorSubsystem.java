@@ -90,11 +90,12 @@ public class FloorSubsystem {
 	    data[2] = (byte) direction;//DIRECTION [The direction the elevator will go AFTER reaching the pickup 1 = Up, 2 = down]
 	    data[3] = (byte) destination;//DESTINATION FLOOR [the floor the elevator must stop at to drop off its passenger]
 	    
+	    
 	    data[4] = (byte) Integer.parseInt(timeStamp.split(":")[0]);//hours
 	    data[5] = (byte) Integer.parseInt(timeStamp.split(":")[1]);//minutes
-	    data[6] = (byte) Integer.parseInt(timeStamp.split(":")[2]);//seconds
-	    data[7] = (byte) Integer.parseInt(timeStamp.split(":")[3]);//Last byte of the milliseconds
-	    data[8] = (byte) (Integer.parseInt(timeStamp.split(":")[3])>>8);//second last byte of the milliseconds
+	    data[6] = (byte) Integer.parseInt(timeStamp.split(":")[2].split(".")[0]);//seconds
+	    data[7] = (byte) Integer.parseInt(timeStamp.split(":")[2].split(".")[1]);//Last byte of the milliseconds
+	    data[8] = (byte) (Integer.parseInt(timeStamp.split(":")[2].split(".")[1])>>8);//second last byte of the milliseconds
 	    
 	    //send the packet
 	    try {

@@ -5,7 +5,9 @@ package Scheduler;
 import java.io.*;
 import java.net.*;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Queue;
+import java.util.Set;
 
 public class Scheduler {
 
@@ -23,6 +25,7 @@ public class Scheduler {
     
     public Scheduler(int numberOfElevatorCars, int numberOfFloors) {
     	numFloors = numberOfFloors;
+    	virtualElevators= new VirtualElevator[numberOfElevatorCars];
 		for(int i = 0; i < numberOfElevatorCars; i++) {
 			virtualElevators[i] = new VirtualElevator(i);
 		}
@@ -76,23 +79,22 @@ public class Scheduler {
           
           
           if(data[0] == 1) {   
-              handleFloorMessage(data);           
-          }
+              handleFloorMessage(data);
+              }
           else if(data[0] == 0) {
               int elevatorNum = handleElevatorMessage(data);
               notifyFloors(elevatorNum);
+              checkServiceRequest();
               commandElevator(elevatorNum);
           }
        
-          checkServiceRequest();
             
-
+          SendSocket.close();
           receiveSocket.close();
     }
     //Notifies every floor of the elevators status 
     private void notifyFloors(int elevatorNumber)
     {
-    	initSockets();
     	for (int i  = 0; i < numFloors; i++)
     	{
 		  byte [] dataToFloor = new byte [4];
@@ -123,7 +125,7 @@ public class Scheduler {
 	       }
 		  
     	}
-      SendSocket.close();
+      
     }
     
     private void commandElevator(int elevatorNum)
@@ -179,55 +181,66 @@ public class Scheduler {
 	}
 	//Checks if any of the pending service requests are servicable
 	public void checkServiceRequest() {
-		int bestCase = 10;
-		int bestElevator = 0;
+		int[] bestCases = new int[elevatorServiceRequests.size()];
+		int[] bestElevators = new int[elevatorServiceRequests.size()];
 		
-		for(int i = 0; i < virtualElevators.length; i++) {
+		//init the bestIdentifiers
+		for(int i = 0; i < virtualElevators.length; i++) {			
+			for(int j = 0; j < elevatorServiceRequests.size(); j++) {
+				bestCases[j] = 10;
+				bestElevators[j] = 0;
+			}
+		}
+		
+		for(int i = 0; i < virtualElevators.length; i++) {			
 			for(int j = 0; j < elevatorServiceRequests.size(); j++) {
 			  //if the elevator current floor is either above or below the pickup floor and is headed in the same direction and current direction
-			  if((bestCase > 1) &&
+			  if((bestCases[j] > 1) &&
 					  (virtualElevators[i].getState() == elevatorServiceRequests.get(j).getDirection()) 
 					  &&
 					  ((virtualElevators[i].getCurrentFloor() < elevatorServiceRequests.get(j).getPickup() && virtualElevators[i].getState() == 1)
 					  ||
 					  ((virtualElevators[i].getCurrentFloor() > elevatorServiceRequests.get(j).getPickup() && virtualElevators[i].getState() == 2)))) 
 					 {
-				  bestCase = 1;
-				  bestElevator = i;
+				  bestCases[j] = 1;
+				  bestElevators[j] = i;
 			  }
-			  else if((bestCase > 2) &&
+			  else if((bestCases[j] > 2) &&
 					  (virtualElevators[i].getServiceDirection() == elevatorServiceRequests.get(j).getDirection()) 
 					  &&
 					  (virtualElevators[i].getState() == 1 && virtualElevators[i].getServiceDirection() == 2)
 					  ||
 					  ((virtualElevators[i].getState() == 2 && virtualElevators[i].getServiceDirection() == 1))){
-				  bestCase = 2;
-				  bestElevator = i;
+				  bestCases[j] = 2;
+				  bestElevators[j] = i;
 			  }
 			  //if the elevator is stationary
-			  else if((bestCase > 3) && virtualElevators[i].getState() == 0) {
-				 bestCase = 3;
-				 bestElevator = i;
+			  else if((bestCases[j] > 3) && virtualElevators[i].getState() == 0) {
+				 bestCases[j] = 3;
+				 bestElevators[j] = i;
 			  }
+
 		  }
+			
 		}
 		
-		if (bestCase == 1)
+		for (int i = elevatorServiceRequests.size()-1; i >= 0; i--)
 		{
 			
+		  	if (bestCases[i] <= 3)//if going same direction of serviceRequest
+			{
+				virtualElevators[bestElevators[i]].floorsToVisit.add(elevatorServiceRequests.get(i).getPickup());
+				virtualElevators[bestElevators[i]].floorsToVisit.add(elevatorServiceRequests.get(i).getDestination());
+				virtualElevators[bestElevators[i]].sortFloorsToVisit(elevatorServiceRequests.get(i).getDirection() == 1);
+				
+				elevatorServiceRequests.remove(i);
+			}
+			else if (bestCases[i] > 3)
+			{
+				//Leave the request to be serviced at a later date.
+			}
 		}
-		else if (bestCase == 2)
-		{
-			
-		}
-		else if (bestCase == 3)
-		{
-			
-		}
-		else if (bestCase > 3)
-		{
-			
-		}
+
 	}
     //A support method that converts a byte[] into a string;
     public static String makeString(byte[] data, int length)

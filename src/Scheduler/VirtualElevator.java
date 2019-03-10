@@ -1,6 +1,7 @@
 package Scheduler;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.Queue;
 
 public class VirtualElevator {
@@ -11,6 +12,18 @@ public class VirtualElevator {
 	public VirtualElevator(int floor) {
 		currentFloor = floor;
 		floorsToVisit = new ArrayList<Integer>();
+	}
+	
+	public void sortFloorsToVisit(boolean ascending)
+	{
+			if (ascending)
+			{
+				floorsToVisit.sort(Comparator.naturalOrder());			
+			}
+			else
+			{
+				floorsToVisit.sort(Comparator.reverseOrder());
+			}	
 	}
 	
 	//SETTER METHODS
