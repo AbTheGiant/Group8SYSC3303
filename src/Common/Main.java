@@ -12,6 +12,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.Scanner;
 
 import javax.swing.JFileChooser;
+import javax.swing.JFrame;
 
 import Elevator.elevatorClass;
 import FloorSubsystem.FloorSubsystem;
@@ -128,11 +129,16 @@ public class Main {
 			if (response == 0)
 			{
 				try {
-					readFromFile(floors);
+					
+						readFromFile(floors);
+					
 				} catch (FileNotFoundException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} catch (InterruptedException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
@@ -149,23 +155,24 @@ public class Main {
 		
 	}
 
-	private static void readFromFile(FloorSubsystem[] floors) throws FileNotFoundException, IOException {
-		 
-		JFileChooser chooser = new JFileChooser();
-		int retval = JFileChooser.CANCEL_OPTION;
-		chooser.setFileSelectionMode( JFileChooser.FILES_ONLY);
-		retval = chooser.showDialog(null, "Select");    
-		if (retval == JFileChooser.APPROVE_OPTION)
-		{
-			File f = chooser.getSelectedFile();
-			try (BufferedReader br = new BufferedReader(new FileReader(f))) {
-			    String line;
-			    while ((line = br.readLine()) != null) {
-			       floors[Integer.parseInt(line.split(" ")[1])].send((line.split(" ")[2].toUpperCase() == "UP" ? 1:2), Integer.parseInt(line.split(" ")[1]), line.split(" ")[0]);
-			    }
-			}
-		}
-		
+	private static void readFromFile(FloorSubsystem[] floors) throws FileNotFoundException, IOException, InterruptedException {
+		JFileChooser jfc = new JFileChooser();
+        JFrame f = new JFrame();
+
+        int retval = jfc.showOpenDialog(f);
+
+        if (retval == JFileChooser.APPROVE_OPTION)
+        {
+            File selectedFile = jfc.getSelectedFile();
+
+            try (BufferedReader br = new BufferedReader(new FileReader(selectedFile))) {
+                String line;
+                while ((line = br.readLine()) != null) {
+                   floors[Integer.parseInt(line.split(" ")[1])].send((line.split(" ")[2].toUpperCase() == "UP" ? 1:2), Integer.parseInt(line.split(" ")[1]), line.split(" ")[0]);
+                   Thread.sleep(1000);
+                }
+            }
+        }
 	}
 
 	private static void interactiveDemo(FloorSubsystem[] floors, Scanner reader) {

@@ -89,13 +89,12 @@ public class FloorSubsystem {
 	    data[1] = (byte) floorNumber;//PICKUP FLOOR [the floor number to pickup the passenger]
 	    data[2] = (byte) direction;//DIRECTION [The direction the elevator will go AFTER reaching the pickup 1 = Up, 2 = down]
 	    data[3] = (byte) destination;//DESTINATION FLOOR [the floor the elevator must stop at to drop off its passenger]
-	    
-	    
+
 	    data[4] = (byte) Integer.parseInt(timeStamp.split(":")[0]);//hours
 	    data[5] = (byte) Integer.parseInt(timeStamp.split(":")[1]);//minutes
-	    data[6] = (byte) Integer.parseInt(timeStamp.split(":")[2].split(".")[0]);//seconds
-	    data[7] = (byte) Integer.parseInt(timeStamp.split(":")[2].split(".")[1]);//Last byte of the milliseconds
-	    data[8] = (byte) (Integer.parseInt(timeStamp.split(":")[2].split(".")[1])>>8);//second last byte of the milliseconds
+	    data[6] = (byte) Integer.parseInt(timeStamp.split(":")[2].substring(0,2));//seconds
+	    data[7] = (byte) Integer.parseInt(timeStamp.split(":")[2].substring(3));//Last byte of the milliseconds
+	    data[8] = (byte) (Integer.parseInt(timeStamp.split(":")[2].substring(3))>>8);//second last byte of the milliseconds
 	    
 	    //send the packet
 	    try {
@@ -121,7 +120,6 @@ public class FloorSubsystem {
 	    receivePacket = new DatagramPacket(data, data.length);
 	    // Waiting until a datagram packet is received from receiveSocket.
 	      try {        
-	         System.out.println("[FloorSubsystem "+floorNumber+"]Waiting..."); // so we know we're waiting
 	         sendReceiveSocket.receive(receivePacket);
 	      } catch (IOException e) {
 	         System.out.print("IO Exception: likely:");
@@ -131,7 +129,6 @@ public class FloorSubsystem {
 	      }
 	      
 	      int len = receivePacket.getLength();
-	      System.out.println("[FloorSubsystem " + floorNumber + "]: Packet received containing: " + makeString(data, len) );
 
 	      
 
@@ -165,12 +162,7 @@ public class FloorSubsystem {
 				ButtonDown.setButton(false);
 		      }
 	    	  System.out.println("[FloorSubsystem "+floorNumber+"]Elevator arrived!");
-	    	  
-	    	  
-	      }
-	      else
-	      {
-	    	  System.out.println("[FloorSubsystem "+floorNumber+"]Elevator on the way!");
+ 
 	      }
 	}
 	

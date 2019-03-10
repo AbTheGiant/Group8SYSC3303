@@ -117,3 +117,13 @@ README.txt - Abiola Olajide and Emmanuel
 JUnit and Test Cases - 	Kyle Smith, Meet Digrajkar and Abiola Olajide
 State Machine Diagram - Kyle Smith
 UML Diagram - 		Emmanuel and Meet
+
+[ITERATION 3]
+Scheduler - Usman Babakura and Meet Digrajkar And Kyle Smith
+FloorSubsystem - Kyle Smith
+Elevator - Abiola Olajide and Emmanuel and Kyle Smith
+README.txt - Abiola Olajide and Emmanuel and Kyle Smith
+JUnit and Test Cases - 	Kyle Smith, Meet Digrajkar and Abiola Olajide
+State Machine Diagram - Kyle Smith
+UML Diagram - 		Emmanuel and Meet
+EMP document 		Kyle Smith

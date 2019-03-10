@@ -65,7 +65,7 @@ public class Scheduler {
         
         // Waiting until a datagram packet is received from receiveSocket.
           try {        
-             System.out.println("[Scheduler]Waiting..."); // so we know we're waiting
+            // System.out.println("[Scheduler]Waiting..."); // so we know we're waiting
              receiveSocket.receive(receivePacket);
           } catch (IOException e) {
              System.out.print("IO Exception: likely:");
@@ -75,19 +75,21 @@ public class Scheduler {
           }
           //write to console usefull info about the packet
           int len = receivePacket.getLength();
-          System.out.println("[Scheduler]: Packet received: Containing: " + makeString(data, len));
+         // System.out.println("[Scheduler]: Packet received: Containing: " + makeString(data, len));
           
           
-          if(data[0] == 1) {   
+          if(data[0] == 1) { 
+
               handleFloorMessage(data);
-              }
+          }
           else if(data[0] == 0) {
               int elevatorNum = handleElevatorMessage(data);
-              notifyFloors(elevatorNum);
               checkServiceRequest();
+              notifyFloors(elevatorNum);
               commandElevator(elevatorNum);
+              
           }
-       
+          
             
           SendSocket.close();
           receiveSocket.close();
@@ -102,7 +104,7 @@ public class Scheduler {
 		  dataToFloor[1] = (byte) virtualElevators[elevatorNumber].getServiceDirection();
 		  dataToFloor[2] = (byte) virtualElevators[elevatorNumber].getCurrentFloor();
 		  
-		  if (virtualElevators[elevatorNumber].getState() > 2 && virtualElevators[i].getCurrentFloor() == i)
+		  if (virtualElevators[elevatorNumber].getState() > 2 && virtualElevators[elevatorNumber].getCurrentFloor() == i)
 		  {
 			  dataToFloor[3] = 1;
 		  }
@@ -146,11 +148,21 @@ public class Scheduler {
     	}
     	else if (virtualElevators[elevatorNum].getCurrentFloor() == virtualElevators[elevatorNum].floorsToVisit.get(0))
     	{
-    		dataToElevator[0] = (byte) 3;
+    		if (virtualElevators[elevatorNum].getState() != 3 && virtualElevators[elevatorNum].getState() != 4 && virtualElevators[elevatorNum].getState() != 5 )
+    		{
+    			dataToElevator[0] = (byte) 3;
+    		}
+    		else
+    		{
+    			dataToElevator[0] = (byte) virtualElevators[elevatorNum].getServiceDirection();
+    		}
     	}
+    	
+    	
 
 		  //Sending the elevator a command
 		  try {
+	          System.out.println("[Scheduler]Sent " + dataToElevator[0] + " to elevator " + elevatorNum); 
 		      sendPacket = new DatagramPacket(dataToElevator, dataToElevator.length,InetAddress.getLocalHost(),2220 + elevatorNum);
 		      SendSocket.send(sendPacket);
 		  }
@@ -168,14 +180,38 @@ public class Scheduler {
     //Handles the message from the floor
 	private void handleFloorMessage(byte[] data) {	  
 		  elevatorServiceRequests.add(new ServiceRequest(data[1],data[3],data[2]));
+          checkServiceRequest();
+          if (virtualElevators[0].getState() == 0 && virtualElevators[0].getServiceDirection() != 0)
+          {
+        	  commandElevator(0);
+          }
+          if (virtualElevators[1].getState() == 0 && virtualElevators[1].getServiceDirection() != 0)
+          {
+        	  commandElevator(1);
+          }
+          if (virtualElevators[2].getState() == 0 && virtualElevators[2].getServiceDirection() != 0)
+          {
+        	  commandElevator(2);
+          }
+          
+          
 	}
 	//Handles the message from the elevator
 	private int handleElevatorMessage(byte[] data) {
 		  int x = data[1];
    
-		  virtualElevators[x].setServiceDirection(data[2]);
 		  virtualElevators[x].setState(data[2]);
 		  virtualElevators[x].setCurrentFloor(data[3]);
+		  
+		  if (virtualElevators[x].getState() == 5)
+		  {
+			  virtualElevators[x].floorsToVisit.remove(0);
+			  if (virtualElevators[x].floorsToVisit.size() == 0)
+			  {
+				  virtualElevators[x].setServiceDirection(0);
+				  virtualElevators[x].setState(0);
+			  }
+		  }
       
 		  return x;
 	}
@@ -229,9 +265,17 @@ public class Scheduler {
 			
 		  	if (bestCases[i] <= 3)//if going same direction of serviceRequest
 			{
-				virtualElevators[bestElevators[i]].floorsToVisit.add(elevatorServiceRequests.get(i).getPickup());
-				virtualElevators[bestElevators[i]].floorsToVisit.add(elevatorServiceRequests.get(i).getDestination());
-				virtualElevators[bestElevators[i]].sortFloorsToVisit(elevatorServiceRequests.get(i).getDirection() == 1);
+		  		if (!virtualElevators[bestElevators[i]].floorsToVisit.contains(elevatorServiceRequests.get(i).getPickup()))
+		  		{
+		  			virtualElevators[bestElevators[i]].floorsToVisit.add(elevatorServiceRequests.get(i).getPickup());
+		  		}
+		  		if (!virtualElevators[bestElevators[i]].floorsToVisit.contains(elevatorServiceRequests.get(i).getDestination()))
+		  		{
+		  			virtualElevators[bestElevators[i]].floorsToVisit.add(elevatorServiceRequests.get(i).getDestination());
+		  		}
+				virtualElevators[bestElevators[i]].setServiceDirection(elevatorServiceRequests.get(i).getDirection());
+
+				virtualElevators[bestElevators[i]].sortFloorsToVisit(elevatorServiceRequests.get(i).getDirection() == 2);
 				
 				elevatorServiceRequests.remove(i);
 			}

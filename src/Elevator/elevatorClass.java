@@ -72,7 +72,7 @@ public class elevatorClass implements Runnable{
 			      
 			      // Block until a datagram packet is received from receiveSocket.
 			      try {        
-			         System.out.println("[elevator "+elevatorNumber+"]:Waiting for scheduler..."); // so we know we're waiting
+			        // System.out.println("[elevator "+elevatorNumber+"]:Waiting for scheduler..."); // so we know we're waiting
 			         contactSocket.receive(contactPacket);
 			      } catch (IOException e) {
 			         System.out.print("IO Exception: likely:");
@@ -80,13 +80,6 @@ public class elevatorClass implements Runnable{
 			         e.printStackTrace();
 			         System.exit(1);
 			      }
-
-			      // Process the received datagram.
-			      System.out.println("[elevator "+elevatorNumber+"]: packet received :");
-			      System.out.println("[elevator "+elevatorNumber+"]:From host: " + contactPacket.getAddress() +":"+ contactPacket.getPort());
-			      System.out.println("[elevator "+elevatorNumber+"]:Containing: "+ makeString(data, contactPacket.getLength()) );
-
-			      // Form a String from the byte array.
 			     
 			      //pickup, destination
 				  return (int) data[0];	
@@ -175,13 +168,13 @@ public class elevatorClass implements Runnable{
 
 			 		break;
 			 	case GOING_UP:
-			 		System.out.println("[elevator "+elevatorNumber+"]:At "+ motor.getCurrentFloor() + " enroute to floor ");
+			 		System.out.println("[elevator "+elevatorNumber+"]:At "+ motor.getCurrentFloor() + " enroute to floor " + (motor.getCurrentFloor() +1));
 			 		
 			 		motor.move(motor.getCurrentFloor() + 1);
 	 				notifyScheduler(0,elevatorNumber,1,motor.getCurrentFloor());//notify the scheduler subsystem of impending arrival
 			 		break;
 			 	case GOING_DOWN:
-			 		System.out.println("[elevator "+elevatorNumber+"]:At "+ motor.getCurrentFloor() + " enroute to floor ");
+			 		System.out.println("[elevator "+elevatorNumber+"]:At "+ motor.getCurrentFloor() + " enroute to floor " + (motor.getCurrentFloor() - 1));
 			 		motor.move(motor.getCurrentFloor() - 1);
 	 				notifyScheduler(0,elevatorNumber,2,motor.getCurrentFloor());//notify the scheduler subsystem of impending arrival
 			 		break;
@@ -190,6 +183,7 @@ public class elevatorClass implements Runnable{
 			 		doors.setDoorState(true);
 			 		stateMachineEnum=StateMachineEnum.DOORS_OPEN;
 	 				notifyScheduler(0,elevatorNumber,3,motor.getCurrentFloor());//notify the scheduler subsystem of impending arrival
+	 				receiveCall();
 			 		doors.setDoorState(false);
 			 		stateMachineEnum=StateMachineEnum.CLOSING_DOORS;
 	 				notifyScheduler(0,elevatorNumber,5,motor.getCurrentFloor());//notify the scheduler subsystem of impending arrival
