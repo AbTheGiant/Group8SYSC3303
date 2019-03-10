@@ -94,9 +94,10 @@ public class Scheduler {
 
 	private int sendToElevator(byte[] data) {
 		  byte [] dataToElevator = new byte [3];
-
+		  	  
 		  elevatorServiceRequests.add(new ServiceRequest(data[1],data[3],data[2]));
-		  
+		
+
 		  try {
 		      sendPacket = new DatagramPacket(dataToElevator, dataToElevator.length, InetAddress.getLocalHost(), 2220+decideWhichElevator(data[1] ,data[0]));
 		  }
@@ -135,7 +136,7 @@ public class Scheduler {
 			  }
 			  //if the elevator is stationary
 			  else if((bestCase > 3) && virtualElevators[i].getState() == 0) {
-				 bestCase = 3;
+				 bestCase = 2;
 				 bestElevator = i;
 			  }
 		  }
@@ -167,7 +168,8 @@ public class Scheduler {
 		      System.exit(1);
 		   }
 	}
-   
+	
+ 
     //A support method that converts a byte[] into a string;
     public static String makeString(byte[] data, int length)
     {
