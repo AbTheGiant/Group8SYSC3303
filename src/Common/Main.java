@@ -1,7 +1,17 @@
 package Common;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Scanner;
+
+import javax.swing.JFileChooser;
 
 import Elevator.elevatorClass;
 import FloorSubsystem.FloorSubsystem;
@@ -107,7 +117,58 @@ public class Main {
 			e.printStackTrace();
 		}
 		
+		
+		
 		Scanner reader = new Scanner(System.in);  // Reading from System.in
+
+		while (true)
+		{
+			System.out.println("[Main]:Please enter 0 to select a file to read from, or 1 for the interactive demo:");
+			int response = reader.nextInt();
+			if (response == 0)
+			{
+				try {
+					readFromFile(floors);
+				} catch (FileNotFoundException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+			else if (response == 1)
+			{
+				interactiveDemo(floors, reader);
+			}
+			else
+			{
+				System.out.println("[Main]:That input was incorrect");
+			}
+		}
+		
+	}
+
+	private static void readFromFile(FloorSubsystem[] floors) throws FileNotFoundException, IOException {
+		 
+		JFileChooser chooser = new JFileChooser();
+		int retval = JFileChooser.CANCEL_OPTION;
+		chooser.setFileSelectionMode( JFileChooser.FILES_ONLY);
+		retval = chooser.showDialog(null, "Select");    
+		if (retval == JFileChooser.APPROVE_OPTION)
+		{
+			File f = chooser.getSelectedFile();
+			try (BufferedReader br = new BufferedReader(new FileReader(f))) {
+			    String line;
+			    while ((line = br.readLine()) != null) {
+			       floors[Integer.parseInt(line.split(" ")[1])].send((line.split(" ")[2].toUpperCase() == "UP" ? 1:2), Integer.parseInt(line.split(" ")[1]), line.split(" ")[0]);
+			    }
+			}
+		}
+		
+	}
+
+	private static void interactiveDemo(FloorSubsystem[] floors, Scanner reader) {
 		while (true)
 		{
 			System.out.println("[Main]:Please enter the floor number you'd like to make a request from: ");
@@ -130,17 +191,18 @@ public class Main {
 					}
 					else
 					{
+						String t = LocalTime.now().format(DateTimeFormatter.ofPattern("HH:mm:ss.SSS"));
 						if (dest > floor)
 						{
-							floors[floor].send(2, dest);
+							floors[floor].send(2, dest, t);
 						}
 						else if (dest < floor)
 						{
-							floors[floor].send(1, dest);
+							floors[floor].send(1, dest, t);
 						}
 						else
 						{
-							floors[floor].send(0, dest);
+							floors[floor].send(0, dest, t);
 						}
 					}
 				}

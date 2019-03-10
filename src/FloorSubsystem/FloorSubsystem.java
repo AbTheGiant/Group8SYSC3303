@@ -83,7 +83,7 @@ public class FloorSubsystem {
 	{
 		
 	    System.out.println("[FloorSubsystem]: Requesting Elevator to floor "+floorNumber+" to ride to floor "+destination+".\n");
-	    byte[] data = new byte[4];
+	    byte[] data = new byte[9];
 	    
 	    data[0] = (byte) 1;//SENDER [who this packet came from, 0 = elevator, ***1 = FLOOR SUBSYSTEM***]
 	    data[1] = (byte) floorNumber;//PICKUP FLOOR [the floor number to pickup the passenger]
@@ -94,7 +94,7 @@ public class FloorSubsystem {
 	    data[5] = (byte) Integer.parseInt(timeStamp.split(":")[1]);//minutes
 	    data[6] = (byte) Integer.parseInt(timeStamp.split(":")[2]);//seconds
 	    data[7] = (byte) Integer.parseInt(timeStamp.split(":")[3]);//Last byte of the milliseconds
-	    data[8] = (byte) Integer.parseInt(timeStamp.split(":")[3]);//second last byte of the milliseconds
+	    data[8] = (byte) (Integer.parseInt(timeStamp.split(":")[3])>>8);//second last byte of the milliseconds
 	    
 	    //send the packet
 	    try {
@@ -137,29 +137,29 @@ public class FloorSubsystem {
 	      //first i update the directional lamp
 	      if (data[1] == 1)
 	      {
-	    	  lampsUp.get(data[4]).setLamps(true);
-	    	  lampsDown.get(data[4]).setLamps(false);
+	    	  lampsUp.get(data[0]).setLamps(true);
+	    	  lampsDown.get(data[0]).setLamps(false);
 	      }
 	      else if (data[1] == 2) {
-	    	  lampsDown.get(data[4]).setLamps(false);
-	    	  lampsUp.get(data[4]).setLamps(true);
+	    	  lampsDown.get(data[0]).setLamps(false);
+	    	  lampsUp.get(data[0]).setLamps(true);
 
 	      }
 	      else if (data[1] == 0)
 	      {
-	    	  lampsDown.get(data[4]).setLamps(false);
-	    	  lampsUp.get(data[4]).setLamps(false);
+	    	  lampsDown.get(data[0]).setLamps(false);
+	    	  lampsUp.get(data[0]).setLamps(false);
 	      }
 	      //Then I check to see if it has arrived or is on the way
 	      if (data[3] == 1)
 	      {
 	    	  //if its arrived I turn off the buttons used to call the elevator based on the direction of the elevator
-		      if (data[1] == 0)
+		      if (data[1] == 1)
 		      {
 		  		ButtonUpLamp.setLamps(false);
 		  		ButtonUp.setButton(false);
 		      }
-		      else if (data[1] == 1) {
+		      else if (data[1] == 2) {
 				ButtonDownLamp.setLamps(false);
 				ButtonDown.setButton(false);
 		      }
@@ -173,25 +173,6 @@ public class FloorSubsystem {
 	      }
 	}
 	
-	/* This is how i thought the subsystem should work, and then the elevator would decide what floor
-	 * however based on the future requirement of this class reading from a file and sending what floor to goto
-	 * i decided to refactor a bit
-	 *  and replace this with iteration1Interact() so the scheduler could be easily interacted with.
-	public void pressUpButton()//simulates what happens when someone presses the up button
-	{
-		ButtonUp.setButton(true);
-		ButtonUpLamp.setLamps(true);
-		send(1);// send up request
-	}
-	
-	public void pressDownButton()
-	{
-		ButtonDown.setButton(true);
-		ButtonDownLamp.setLamps(true);
-		send(0);//send down request
-
-	}
-	 */
 	
 	
 	//A support method that converts a byte[] into a string;

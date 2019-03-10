@@ -163,13 +163,6 @@ public class elevatorClass implements Runnable{
 		}
 	 @Override
 	public void run() {
-		 System.out.println("Starting Elevator");
-		 Thread receiving = new Thread(() -> {
-				while (true) {
-					receiveCall();
-				}
-			});
-		 receiving.start();
 		 while (true)
 		 {		
 			 	
@@ -208,15 +201,5 @@ public class elevatorClass implements Runnable{
 		 
 		 
 	}
-	//when run, this will turn on the elevator and put it into an endless listening loop.
-//	public static void main(String args[])
-//	   {
-//		 //start the program
-//	      elevatorClass c = new elevatorClass(7,1);
-//	      while (true)
-//	      {
-//	    	  c.receiveCall();
-//	      }
-//	   }
 
 }

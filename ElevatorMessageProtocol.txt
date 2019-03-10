@@ -18,11 +18,16 @@ The Floor Subsystem
 		BYTE 1: PICKUP FLOOR [the floor number to pickup the passenger]
 		BYTE 2: DIRECTION [The direction the elevator will go AFTER reaching the pickup 1 = Up, 2 = down]
 		BYTE 3: DESTINATION FLOOR [the floor the elevator must stop at to drop off its passenger]
-		BYTE 4: TIMESTAMP  [IMPLEMENTATION TO BE DETERMINED, MIGHT NEED TO BE TWO BYTES OR MORE]	
+		BYTE 4: TIMESTAMP HOURS
+		BYTE 5: TIMESTAMP MINUTES
+		BYTE 6: TIMESTAMP SECONDS
+		BYTE 7: TIMESTAMP MILLISECONDS 1 [least sig. byte, aka.  0x#### && 0x00FF]
+		BYTE 8: TIMESTAMP MILLISECONDS 2 [second least sig. byte, aka. 0x#### && 0xFF00]	
 	RECEIVES:
 		BYTE 0: ELEVATOR NUMBER [The elevator number you're informing the subsystem of, elevator 0, 1 or 2]
 		BYTE 1: STATE [state of the elevator, ONLY SEND 0 = stationary, 1 = Up, 2 = down, during states 3/4/5 = 0/1/2 depending on next state]
 		BYTE 2: CURRENT FLOOR [the floor of the elevator you're informing the subsystem of, 0-6]
+		BYTE 3: ELEVATOR ARRIVED [0 = elevator not stopping, 1 = elevator stopping]
 
 The Scheduler
 	This class will be responsible for sending the packets the other two classes receive. Here is the breakdown
@@ -30,16 +35,20 @@ The Scheduler
 	
 	Rules
 		1: Must update each floor when a direction change occurs in an elevator, or it goes stationary
-		2: Must decide which elevator to deploy to a pickup based on status of elevators/passenger count
-		3: Must always respond to the elevator messages, giving it a command. EXCEPT FOR STATES 3,4,5
-		4: Must ensure the virtual elevators are synced with actual elevators.
+		2: Must keep track of all service requests (added to a list when the floor sends a message)
+		3: Must ensure the virtual elevators are synced with actual elevators (updated whenever the elevator sends a message).
+		4: Must always respond to the elevator messages, giving it a command. EXCEPT FOR STATES 3 and 4 (after 5, tell it to start moving or stay stationary)
+		5: After any message received (either elevator status update, or floor service request) check if any elevators can handle any of the service requests
+			1: Check each service request against each elevator (nested for loop, i = elevator, j = service)
+			2: Check which case it falls under in the algorithm
+				BEST: IMMEDIATELY SERVICE THE REQUEST (add it to the elevators floor queue?)
+				2nd: Check other elevators to see if they fall under the best case, but save this as a possible service handler
+				3rd: this elevator can not handle the service request
+			3: Select the elevator with the best case (this can be implemented however you want using the last two steps)
+
 	Algorithm:
-		BEST = STATIONARY
-		2nd = DOESNT REQUIRE DIRECTION CHANGE, ALREADY ABOVE/BELOW pickup and destination is BELOW/ABOVE respectively.
-		3rd = headed past pickup floor, before heading in the correct direction I.E. Headed up to pick someone going down, 
-			when a lower floor requesting going down is made
-		4th = REQUIRES DIRECTION CHANGE OR RE-MAPPING I.E. Headed up to pick someone going down, when a higher floor 
-			requesting going down happens so you can move the previous pickup to the down queue, and the new highest
-			floor to the up queue. or the same case but opposite directions		
-		5th= least favourable = Headed in the same direction as request, but not along path I.E. at floor 4 headed down, when floor 6 requests going down
-			MUST EMPTY QUEUE ENTIRELY TO PICK UP THE PERSON. IF THERE ARE MULTIPLE IN THIS CASE, PICK THE ONE CLOSEST TO COMPLETING IT'S QUEUE
+		BEST = DOESNT REQUIRE DIRECTION CHANGE, ALREADY ABOVE/BELOW pickup and destination is BELOW/ABOVE respectively.
+		2nd = HEADED IN OPPOSITE DIRECTION OF SERVICE.DIRECTION, AND ELEVATOR.serviceDirection = SERVICE>DIRECTION 
+		3rd = STATIONARY
+		4th = cant be handled
+		
