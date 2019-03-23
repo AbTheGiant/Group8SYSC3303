@@ -148,11 +148,13 @@ public class Scheduler {
     	else if (virtualElevators[elevatorNum].getCurrentFloor() < virtualElevators[elevatorNum].floorsToVisit.get(0))
     	{
     		dataToElevator[0] = (byte) 1;
+    		virtualElevators[elevatorNum].setT(new Timer(2000));
     		virtualElevators[elevatorNum].getT().start();
     	}
     	else if (virtualElevators[elevatorNum].getCurrentFloor() > virtualElevators[elevatorNum].floorsToVisit.get(0))
     	{
     		dataToElevator[0] = (byte) 2;
+    		virtualElevators[elevatorNum].setT(new Timer(2000));
     		virtualElevators[elevatorNum].getT().start();
     	}
     	else if (virtualElevators[elevatorNum].getCurrentFloor() == virtualElevators[elevatorNum].floorsToVisit.get(0))
@@ -269,9 +271,7 @@ public class Scheduler {
 				 bestCases[j] = 3;
 				 bestElevators[j] = i;
 			  }
-
-		  }
-			
+		  }	
 		}
 		
 		for (int i = elevatorServiceRequests.size()-1; i >= 0; i--)
