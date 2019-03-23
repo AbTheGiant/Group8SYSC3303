@@ -105,6 +105,11 @@ public class elevatorClass implements Runnable{
 		case 3:
 			stateMachineEnum = StateMachineEnum.OPENING_DOORS;
 			break;
+		case 6:
+			stateMachineEnum = StateMachineEnum.SOFT_FAULT;
+			break;
+		case 7:
+			stateMachineEnum = StateMachineEnum.HARD_FAULT;
 		default:
 			break;
 		}

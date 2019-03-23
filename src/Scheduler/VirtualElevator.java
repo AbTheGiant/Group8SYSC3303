@@ -9,6 +9,8 @@ public class VirtualElevator {
 	private int currentFloor,serviceDirection,state,elevatorNumber,timeStamp;
 	public ArrayList<Integer> floorsToVisit;
 	
+	private boolean isSoftFault, isHardFault;
+	
 	public VirtualElevator(int floor) {
 		currentFloor = floor;
 		floorsToVisit = new ArrayList<Integer>();
@@ -66,5 +68,21 @@ public class VirtualElevator {
 	
 	public int getTimeStamp() {
 		return timeStamp;
+	}
+
+	public boolean isSoftFault() {
+		return isSoftFault;
+	}
+
+	public void setSoftFault(boolean isSoftFault) {
+		this.isSoftFault = isSoftFault;
+	}
+
+	public boolean isHardFault() {
+		return isHardFault;
+	}
+
+	public void setHardFault(boolean isHardFault) {
+		this.isHardFault = isHardFault;
 	}
 }

@@ -4,13 +4,11 @@ public class ServiceRequest {
 	private int pickup;
 	private int destination;
 	private int direction;
-	private boolean handled;
 	
 	public ServiceRequest(int pickup, int destination,int direction) {
 		this.pickup = pickup;
 		this.destination = destination;
 		this.direction = direction;
-		this.handled = false;
 	}
 	
 	public ServiceRequest() {
@@ -28,9 +26,6 @@ public class ServiceRequest {
 	public int getPickup() {
 		return pickup;
 	}
-	private boolean getHandled() {
-		return handled;
-	}
 	
 	//SETTER METHODS
 	public void setDestination(int destination) {
@@ -43,9 +38,6 @@ public class ServiceRequest {
 	
 	public void setPickup(int pickup) {
 		this.pickup = pickup;
-	}
-	public void setHandled(boolean handled) {
-		this.handled = handled;
 	}
 	
 }
