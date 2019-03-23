@@ -110,6 +110,7 @@ public class elevatorClass implements Runnable{
 			break;
 		case 7:
 			stateMachineEnum = StateMachineEnum.HARD_FAULT;
+			break;
 		default:
 			break;
 		}
@@ -169,7 +170,6 @@ public class elevatorClass implements Runnable{
 			 	
 			 switch(stateMachineEnum)
 			 {
-
 			 	case STATIONARY:
 			 		System.out.println("[elevator "+elevatorNumber+"]:At "+ motor.getCurrentFloor() + " is stationary ");
 	 				notifyScheduler(0,elevatorNumber,0,motor.getCurrentFloor());//notify the scheduler of current state
@@ -195,6 +195,14 @@ public class elevatorClass implements Runnable{
 			 		doors.setDoorState(false);
 			 		stateMachineEnum=StateMachineEnum.CLOSING_DOORS;
 	 				notifyScheduler(0,elevatorNumber,5,motor.getCurrentFloor());//notify the scheduler subsystem of impending arrival
+			 		break;
+			 	case SOFT_FAULT:
+			 		System.out.println("SOFT FAULT OCCURED AT: " + motor.getCurrentFloor());
+			 		notifyScheduler(0,elevatorNumber,6,motor.getCurrentFloor());
+			 		break;
+			 	case HARD_FAULT:
+			 		System.out.println("HARD FAULT OCCURED AT: " + motor.getCurrentFloor());
+			 		System.exit(0);
 			 		break;
 			 }
 			 executeCommand(receiveCall());
