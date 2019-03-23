@@ -95,8 +95,9 @@ public class FloorSubsystem {
 	    data[4] = (byte) Integer.parseInt(timeStamp.split(":")[0]);//hours
 	    data[5] = (byte) Integer.parseInt(timeStamp.split(":")[1]);//minutes
 	    data[6] = (byte) Integer.parseInt(timeStamp.split(":")[2].substring(0,2));//seconds
-	    data[7] = (byte) Integer.parseInt(timeStamp.split(":")[2].substring(3));//Last byte of the milliseconds
-	    data[8] = (byte) (Integer.parseInt(timeStamp.split(":")[2].substring(3))>>8);//second last byte of the milliseconds
+	    
+	    data[7] = (byte) Short.parseShort(timeStamp.split(":")[2].substring(3));//Last byte of the milliseconds
+	    data[8] = (byte) (Short.parseShort(timeStamp.split(":")[2].substring(3))>>8);//second last byte of the milliseconds
 	    
 	    //send the packet
 	    try {

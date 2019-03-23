@@ -314,6 +314,7 @@ public class Scheduler {
     	return (short) ((b1 << 8) | (b2 & 0xFF));
     }
     public static void main(String[] args) {
+    	System.out.println("Starting Scheduler...");
     	Scheduler scheduler = new Scheduler(3, 7);
     	while (true)
 		{
