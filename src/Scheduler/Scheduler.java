@@ -301,6 +301,7 @@ public class Scheduler {
         return retVal;
     }
     public static void main(String[] args) {
+    	System.out.println("Starting Scheduler...");
     	Scheduler scheduler = new Scheduler(3, 7);
     	while (true)
 		{
