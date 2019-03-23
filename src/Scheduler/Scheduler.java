@@ -24,7 +24,6 @@ public class Scheduler {
     DatagramSocket receiveSocket, SendSocket;
     
     InetAddress subsystemsAddress;
-    Timer t;
     
     public Scheduler(int numberOfElevatorCars, int numberOfFloors) {
     	numFloors = numberOfFloors;
@@ -148,12 +147,12 @@ public class Scheduler {
     	else if (virtualElevators[elevatorNum].getCurrentFloor() < virtualElevators[elevatorNum].floorsToVisit.get(0))
     	{
     		dataToElevator[0] = (byte) 1;
-    		t.start();
+    		virtualElevators[elevatorNum].getT().start();
     	}
     	else if (virtualElevators[elevatorNum].getCurrentFloor() > virtualElevators[elevatorNum].floorsToVisit.get(0))
     	{
     		dataToElevator[0] = (byte) 2;
-    		t.start();
+    		virtualElevators[elevatorNum].getT().start();
     	}
     	else if (virtualElevators[elevatorNum].getCurrentFloor() == virtualElevators[elevatorNum].floorsToVisit.get(0))
     	{
@@ -194,7 +193,6 @@ public class Scheduler {
     
     //Handles the message from the floor
 	private void handleFloorMessage(byte[] data) {
-		t = new Timer(2000);
 		  elevatorServiceRequests.add(new ServiceRequest(data[1],data[3],data[2]));
           checkServiceRequest();
           if (virtualElevators[0].getState() == 0 && virtualElevators[0].getServiceDirection() != 0)
@@ -225,7 +223,7 @@ public class Scheduler {
 				  virtualElevators[x].setState(0);
 			  }
 		  }
-		  if(t.isExpired()) {
+		  if(virtualElevators[x].getT().isExpired()) {
 			  virtualElevators[x].setHardFault(true);
 		  }
 		  return x;

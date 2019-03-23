@@ -10,6 +10,7 @@ public class VirtualElevator {
 	public ArrayList<Integer> floorsToVisit;
 	
 	private boolean isSoftFault, isHardFault;
+	private Timer t;
 	
 	public VirtualElevator(int floor) {
 		currentFloor = floor;
@@ -84,5 +85,13 @@ public class VirtualElevator {
 
 	public void setHardFault(boolean isHardFault) {
 		this.isHardFault = isHardFault;
+	}
+
+	public Timer getT() {
+		return t;
+	}
+
+	public void setT(Timer t) {
+		this.t = t;
 	}
 }
