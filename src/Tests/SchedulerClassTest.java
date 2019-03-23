@@ -21,7 +21,7 @@ class SchedulerClassTest {
 	
 	@Test
 	void testSendReceive() {
-		s = new Scheduler();
+		s = new Scheduler(3, 7);
 		
 		new Thread(() -> {
 		    s.sendReceive();
