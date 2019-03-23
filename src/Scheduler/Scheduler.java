@@ -87,13 +87,14 @@ public class Scheduler {
               handleFloorMessage(data);
           }
           else if(data[0] == 0) {
+        	  int previousState = virtualElevators[data[1]].getState();
               int elevatorNum = handleElevatorMessage(data);
               checkServiceRequest();
               notifyFloors(elevatorNum);
-              if (virtualElevators[elevatorNum].getServiceDirection() != 0 || (virtualElevators[elevatorNum].getServiceDirection() == 0 && virtualElevators[elevatorNum].getState() != 0 ))
+              if (virtualElevators[elevatorNum].getState() != previousState)
               {
             	  commandElevator(elevatorNum);
-              }
+              }              
               
           }
           
