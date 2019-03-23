@@ -276,10 +276,15 @@ public class Scheduler {
 			}
 		}
 		
-		for(int i = 0; i < virtualElevators.length; i++) {			
+		for(int i = 0; i < virtualElevators.length; i++) {
 			for(int j = 0; j < elevatorServiceRequests.size(); j++) {
-			  //if the elevator current floor is either above or below the pickup floor and is headed in the same direction and current direction
-			  if((bestCases[j] > 1) &&
+
+			 if(virtualElevators[i].isHardFault()) {
+				  bestCases[j] = 1000;
+				  bestElevators[j] = i;
+			 } 
+			 //if the elevator current floor is either above or below the pickup floor and is headed in the same direction and current direction
+		   	 else if((bestCases[j] > 1) &&
 					  (virtualElevators[i].getState() == elevatorServiceRequests.get(j).getDirection() && virtualElevators[i].getServiceDirection() == elevatorServiceRequests.get(j).getDirection()) 
 					  &&
 					  ((virtualElevators[i].getCurrentFloor() < elevatorServiceRequests.get(j).getPickup() && virtualElevators[i].getState() == 1)
@@ -303,15 +308,12 @@ public class Scheduler {
 				 bestCases[j] = 3;
 				 bestElevators[j] = i;
 			  }
-
-		  }
-			
+		  }	
 		}
 		
 		Set elevatorsWithPendingCommands = new HashSet();
 		for (int i = elevatorServiceRequests.size()-1; i >= 0; i--)
-		{
-			
+		{			
 		  	if (bestCases[i] <= 3)//if going same direction of serviceRequest
 			{
 		  		if (!virtualElevators[bestElevators[i]].floorsToVisit.contains(elevatorServiceRequests.get(i).getPickup()))
