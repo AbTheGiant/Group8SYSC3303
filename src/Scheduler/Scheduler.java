@@ -90,7 +90,10 @@ public class Scheduler {
               int elevatorNum = handleElevatorMessage(data);
               checkServiceRequest();
               notifyFloors(elevatorNum);
-              commandElevator(elevatorNum);
+              if (virtualElevators[elevatorNum].getServiceDirection() != 0 || (virtualElevators[elevatorNum].getServiceDirection() == 0 && virtualElevators[elevatorNum].getState() != 0 ))
+              {
+            	  commandElevator(elevatorNum);
+              }
               
           }
           
