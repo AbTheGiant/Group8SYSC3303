@@ -13,6 +13,7 @@ public class VirtualElevator {
 	private Timer t;
 	
 	public VirtualElevator(int floor) {
+		t = new Timer(2000);
 		currentFloor = floor;
 		floorsToVisit = new ArrayList<Integer>();
 	}
