@@ -90,7 +90,7 @@ public class Scheduler {
               int elevatorNum = handleElevatorMessage(data);
               checkServiceRequest();
               notifyFloors(elevatorNum);
-              if (virtualElevators[elevatorNum].getState() != previousState)
+              if (virtualElevators[elevatorNum].getState() != previousState || virtualElevators[elevatorNum].getState() != 0)
               {
             	  commandElevator(elevatorNum);
               }              
@@ -165,7 +165,7 @@ public class Scheduler {
     		}
     		else
     		{
-    			dataToElevator[0] = (byte) virtualElevators[elevatorNum].getServiceDirection();
+    			dataToElevator[0] = (byte) virtualElevators[elevatorNum].getState();
     		}
     	}
     	else if(virtualElevators[elevatorNum].isSoftFault())
@@ -178,8 +178,10 @@ public class Scheduler {
     	}
 
 		  //Sending the elevator a command
+    	String command = commandToString(dataToElevator[0]);
 		  try {
-	          System.out.println("[Scheduler]Sent " + dataToElevator[0] + " to elevator " + elevatorNum); 
+	          System.out.println("[Scheduler]Sent " + String.format("%-15s", command) + " to [elevator" + elevatorNum  + "] current state:" + virtualElevators[elevatorNum].getState() + " floor:" + virtualElevators[elevatorNum].getCurrentFloor()
+	        		  ); 
 		      sendPacket = new DatagramPacket(dataToElevator, dataToElevator.length,subsystemsAddress,2220 + elevatorNum);
 		      SendSocket.send(sendPacket);
 		  }
@@ -194,7 +196,30 @@ public class Scheduler {
     }
     
     
-    //Handles the message from the floor
+    private String commandToString(byte b) {
+		String retVal = "";
+    	if (b == 0)
+		{
+			retVal = "{Go Stationary}";
+		}
+    	else if (b == 1)
+    	{
+			retVal = "{Go Up}";
+
+    	}
+    	else if (b == 2)
+    	{
+			retVal = "{Go Down}";
+
+    	}
+    	else if (b >= 3)
+    	{
+    		retVal = "{Cycle Doors}";
+    	}
+		return retVal;
+	}
+
+	//Handles the message from the floor
 	private void handleFloorMessage(byte[] data) {
 		  elevatorServiceRequests.add(new ServiceRequest(data[1],data[3],data[2]));
           checkServiceRequest();
