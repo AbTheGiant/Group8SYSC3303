@@ -7,6 +7,8 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Scanner;
@@ -23,7 +25,7 @@ public class Main {
 	public static void main(String[] args) {
 		System.out.println("[Main]Please wait while the system is initialized...");
 		elevatorClass[] elevators = new elevatorClass[3];
-		
+		/* EXCLUDING SCHEDULER FOR RUNNING ON A SEPERATE PC
 		Scheduler scheduler = new Scheduler(3, 7);
 		
 		new Thread(() -> {
@@ -33,11 +35,16 @@ public class Main {
 				scheduler.sendReceive();
 			}
 		}).start();
-		
+		*/
 		FloorSubsystem[] floors = new FloorSubsystem[7];
 		for (int i = 0; i < 3; i++)
 		{
-			elevators[i] = new elevatorClass(7, i);
+			try {
+				elevators[i] = new elevatorClass(7, i, InetAddress.getByName("174.112.61.126") );
+			} catch (UnknownHostException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 
 		}
 		Thread e1 = new Thread (elevators[0]);
@@ -49,7 +56,12 @@ public class Main {
 		
 		for (int i = 0; i < 7; i++)
 		{
-			floors[i] = new FloorSubsystem(i, 3);
+			try {
+				floors[i] = new FloorSubsystem(i, 3, InetAddress.getByName("174.112.61.126"));
+			} catch (UnknownHostException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 		}
 		
 		new Thread(() -> {

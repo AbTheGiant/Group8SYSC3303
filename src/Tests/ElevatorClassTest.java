@@ -1,6 +1,8 @@
 package Tests;
 import static org.junit.jupiter.api.Assertions.*;
 
+import java.net.InetAddress;
+
 import org.junit.jupiter.api.Test;
 
 import Common.StateMachineEnum;
@@ -13,7 +15,7 @@ class ElevatorClassTest {
 		
 		
 		try {
-		elevatorClass test=  new elevatorClass(7,1); 
+		elevatorClass test=  new elevatorClass(7,1, InetAddress.getLocalHost()); 
 		//elevatorMotor testTwo =new elevatorMotor(5);
 		elevatorMotor tester = new elevatorMotor(3);
 		//test.deployElevator(destFloor);

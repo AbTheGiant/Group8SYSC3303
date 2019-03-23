@@ -23,7 +23,7 @@ class FloorSubSystemClassTest {
 	@BeforeEach
 	void setUp() throws Exception {
 		//floor system for floor 4
-		fs = new FloorSubsystem(4, 3);
+		fs = new FloorSubsystem(4, 3, InetAddress.getLocalHost());
 		
 	}
 

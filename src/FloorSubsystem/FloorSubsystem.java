@@ -26,6 +26,7 @@ public class FloorSubsystem {
 	//These two lamps are the directional lamp indicating which way the elevator is headed.
 	public ArrayList<lampsClass> lampsUp = new ArrayList<lampsClass>();
 	public ArrayList<lampsClass> lampsDown = new ArrayList<lampsClass>();
+	public InetAddress SchedulerAddress;
 	//This is the floornumber of the subsystem
 	public int floorNumber; 
 	//this boolean is used exclusively for the iteration1 interaction i set up
@@ -47,7 +48,7 @@ public class FloorSubsystem {
 	// (send to simulator) mode
 	
 	//the constructor, initializes fields and opens socket
-	public FloorSubsystem(int floor, int numberOfElevators) {
+	public FloorSubsystem(int floor, int numberOfElevators, InetAddress scheduler) {
 		//init fields
 		for (int i = 0; i < numberOfElevators; i++)
 		{
@@ -63,6 +64,7 @@ public class FloorSubsystem {
 		ButtonDownLamp.setLamps(false);
 		
 		floorNumber = floor;
+		SchedulerAddress = scheduler;
 
 		{
 			   try {
@@ -99,9 +101,9 @@ public class FloorSubsystem {
 	    //send the packet
 	    try {
 	          sendPacket = new DatagramPacket(data, data.length,
-	                                    InetAddress.getLocalHost(), 1111);
+	                                    SchedulerAddress, 1111);
 	      }
-	      catch (UnknownHostException e) {
+	      catch (Exception e) {
 	          e.printStackTrace();
 	          System.exit(1);
 	       }

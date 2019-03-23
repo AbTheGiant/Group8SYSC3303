@@ -31,11 +31,14 @@ public class elevatorClass implements Runnable{
  	 elevatorDoors doors;
  	 //the elevator's motor
  	 elevatorMotor motor;
+ 	 //the schedulers address
+ 	 InetAddress SchedulerAddress;
  	 
  	 //The constructor, sets numFloors and inits all variables
-	 public elevatorClass(int numFloors, int elevatorNumber){
+	 public elevatorClass(int numFloors, int elevatorNumber, InetAddress scheduler){
 		this.numFloors=numFloors; 	
 		this.elevatorNumber=elevatorNumber;
+		SchedulerAddress = scheduler;
 		stateMachineEnum= StateMachineEnum.STATIONARY;
 		//currentFloor=0;
 		try {
@@ -121,9 +124,9 @@ public class elevatorClass implements Runnable{
 	    
 	    try {
 	          contactPacket = new DatagramPacket(data, data.length,
-	                                    InetAddress.getLocalHost(), 1111);
+	                                    SchedulerAddress, 1111);
 	      }
-	      catch (UnknownHostException e) {
+	      catch (Exception e) {
 	          e.printStackTrace();
 	          System.exit(1);
 	       }

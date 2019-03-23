@@ -23,6 +23,8 @@ public class Scheduler {
     DatagramPacket sendPacket, receivePacket;
     DatagramSocket receiveSocket, SendSocket;
     
+    InetAddress subsystemsAddress;
+    
     public Scheduler(int numberOfElevatorCars, int numberOfFloors) {
     	numFloors = numberOfFloors;
     	virtualElevators= new VirtualElevator[numberOfElevatorCars];
@@ -75,6 +77,7 @@ public class Scheduler {
           }
           //write to console usefull info about the packet
           int len = receivePacket.getLength();
+          subsystemsAddress = receivePacket.getAddress();
          // System.out.println("[Scheduler]: Packet received: Containing: " + makeString(data, len));
           
           
@@ -114,7 +117,7 @@ public class Scheduler {
 		  }	  		  
 		  //Sending the elevator info to the floor 
 		  try {
-		      sendPacket = new DatagramPacket(dataToFloor, dataToFloor.length,InetAddress.getLocalHost(),3330 + i);
+		      sendPacket = new DatagramPacket(dataToFloor, dataToFloor.length,subsystemsAddress,3330 + i);
 		      SendSocket.send(sendPacket);
 		  }
 		  catch (UnknownHostException e) {
@@ -163,7 +166,7 @@ public class Scheduler {
 		  //Sending the elevator a command
 		  try {
 	          System.out.println("[Scheduler]Sent " + dataToElevator[0] + " to elevator " + elevatorNum); 
-		      sendPacket = new DatagramPacket(dataToElevator, dataToElevator.length,InetAddress.getLocalHost(),2220 + elevatorNum);
+		      sendPacket = new DatagramPacket(dataToElevator, dataToElevator.length,subsystemsAddress,2220 + elevatorNum);
 		      SendSocket.send(sendPacket);
 		  }
 		  catch (UnknownHostException e) {
@@ -297,5 +300,12 @@ public class Scheduler {
         retVal.substring(0, retVal.length()-1);
         return retVal;
     }
-    
+    public static void main(String[] args) {
+    	Scheduler scheduler = new Scheduler(3, 7);
+    	while (true)
+		{
+			scheduler.sendReceive();
+		}
+    }
 }
+    
