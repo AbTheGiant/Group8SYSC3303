@@ -264,7 +264,7 @@ public class Scheduler {
         	  commandElevator(2);
           }
           floorProcessTimes.add((long)(System.currentTimeMillis() -
-        				  ((data[4] * 3.6 * Math.pow(10, 6)) + (data[5] * 60000) + (data[6] * 1000) + twoBytesToShort(data[7],data[8]))));
+				  ((data[4] * 3.6 * Math.pow(10, 6)) + (data[5] * 60000) + (data[6] * 1000) + twoBytesToShort(data[7],data[8]))));
 	}
 	//Handles the message from the elevator
 	private int handleElevatorMessage(byte[] data) {
@@ -279,6 +279,11 @@ public class Scheduler {
 			  for(int i = 0;i < processedRequests.size(); i++) {
 				if(processedRequests.get(i).getElevatorAssigned() == x
 						&& processedRequests.get(i).getDestination() == virtualElevators[x].floorsToVisit.get(0)) {
+					processedRequests.get(i).setTimes(3);
+					completedRequests.add(processedRequests.remove(i));
+				}
+				if(processedRequests.get(i).getElevatorAssigned() == x
+						&& processedRequests.get(i).getPickup() == virtualElevators[x].floorsToVisit.get(0)) {
 					processedRequests.get(i).setTimes(2);
 					completedRequests.add(processedRequests.remove(i));
 				}
@@ -383,7 +388,7 @@ public class Scheduler {
 				else if (elevatorServiceRequests.get(i).isInvokeSendStats())
 				{
 					elevatorServiceRequests.remove(i);
-
+					checkStats();
 				}
 			}
 		}
@@ -392,11 +397,79 @@ public class Scheduler {
 
 	}
 	private void checkStats() {
-		double pickupTime, assignedTime;
+		double assignedTime, pickupTime, completionTime, elevatorprocesstime, floorprocesstime;
+		double variAssigned,variPickup, variEProcessTime, variFProcessTime;
+		
+		assignedTime = 0;
+		pickupTime = 0;
+		completionTime = 0;
+		elevatorprocesstime = 0;
+		floorprocesstime = 0;
+		variAssigned = 0;
+		variPickup = 0;
+		variEProcessTime = 0;
+		variFProcessTime = 0;
 		
 		for(ServiceRequest sr : completedRequests) {
-			
+			assignedTime += sr.getTimes(1) - sr.getTimes(0);
+			pickupTime += sr.getTimes(2) - sr.getTimes(0);
+			completionTime += sr.getTimes(3) - sr.getTimes(0);			
 		}
+		
+		//average pickup and completion time
+		assignedTime /= completedRequests.size();
+		pickupTime /= completedRequests.size();
+		completionTime /= completedRequests.size();
+		
+		for(ServiceRequest sr : completedRequests) {
+			variAssigned += assignedTime - Math.pow(sr.getTimes(1) - sr.getTimes(0),2);
+			variPickup += pickupTime - Math.pow(sr.getTimes(2) - sr.getTimes(0),2);			
+		}
+		
+		//variance of assigned and pickup time
+		variAssigned /= (completedRequests.size() - 1);
+		variPickup /= (completedRequests.size() - 1);
+		
+		for(Long ept: elevatorProcessTimes) {
+			elevatorprocesstime += ept;
+		}
+		
+		//average elevator process time
+		elevatorprocesstime /= elevatorProcessTimes.size();
+		
+		for(Long ept: elevatorProcessTimes) {
+			variEProcessTime += Math.pow(ept - elevatorprocesstime, 2);
+		}
+		
+		//variance of elevator process time
+		variEProcessTime /= (elevatorProcessTimes.size()-1);
+		
+		for(Long fpt: floorProcessTimes) {
+			floorprocesstime += fpt;
+		}
+		
+		//average floor process time
+		floorprocesstime /= floorProcessTimes.size();
+	
+		for(Long ept: elevatorProcessTimes) {
+			variFProcessTime += Math.pow(ept - floorprocesstime, 2);
+		}
+		
+		//variance of floor process time
+		variFProcessTime /= (floorProcessTimes.size()-1);
+		
+		//print all STATS
+		System.out.println("Average Of Assgined Time: " + assignedTime);
+		System.out.println("Variance Of Assgined Time: " + variAssigned);
+		
+		System.out.println("Average Of Pickup Time: " + pickupTime);
+		System.out.println("Variance Of Pickup Time: " + variPickup);
+		
+		System.out.println("Average Of Elevator Process Time: " + elevatorprocesstime);
+		System.out.println("Variance Of Elevator Process Time: " + variEProcessTime);
+		
+		System.out.println("Average Of Floor Process Time: " + floorprocesstime);
+		System.out.println("Variance Of Floor Process Time: " + variFProcessTime);
 	}
 	
     //A support method that converts a byte[] into a string;
