@@ -20,9 +20,9 @@ public class ServiceRequest {
 		}
 		else if (type == 2)
 		{
-			setInvokeSendStats(true);
+			invokeSendStats = true;
 		}
-		times = new long[3];
+		times = new long[4];
 		//Time before assigned
 		times[0] = System.currentTimeMillis();
 	}
