@@ -98,9 +98,9 @@ public class Scheduler {
           else if(data[0] == 0) {
         	  int previousState = virtualElevators[data[1]].getState();
               int elevatorNum = handleElevatorMessage(data);
-              checkServiceRequest();
+              Set elevatorsToCommand = checkServiceRequest();
               notifyFloors(elevatorNum);
-              if (virtualElevators[elevatorNum].getState() != previousState || virtualElevators[elevatorNum].getState() != 0)
+              if (virtualElevators[elevatorNum].floorsToVisit.size() != 0 || previousState != 0)              
               {
             	  commandElevator(elevatorNum);
               }              
@@ -151,41 +151,49 @@ public class Scheduler {
     {
     	byte[] dataToElevator = new byte[1];
     	
-    	if (virtualElevators[elevatorNum].floorsToVisit.size() == 0)
+    	if(virtualElevators[elevatorNum].isSoftFault())
+    	{
+    		dataToElevator[0] = (byte) 3;//send it the command to cycle its doors
+    	}
+    	else if(virtualElevators[elevatorNum].isHardFault())
+    	{
+    		dataToElevator[0] = (byte) 7;
+    	} 	
+    	else if (virtualElevators[elevatorNum].floorsToVisit.size() == 0)
     	{
     		dataToElevator[0] = (byte) 0;
+    		virtualElevators[elevatorNum].setT(new Timer(999999999));
+    		virtualElevators[elevatorNum].getT().start();
     	}
     	else if (virtualElevators[elevatorNum].getCurrentFloor() < virtualElevators[elevatorNum].floorsToVisit.get(0))
     	{
     		dataToElevator[0] = (byte) 1;
-    		virtualElevators[elevatorNum].setT(new Timer(2000));
+    		virtualElevators[elevatorNum].setT(new Timer(3000));
     		virtualElevators[elevatorNum].getT().start();
     	}
     	else if (virtualElevators[elevatorNum].getCurrentFloor() > virtualElevators[elevatorNum].floorsToVisit.get(0))
     	{
     		dataToElevator[0] = (byte) 2;
-    		virtualElevators[elevatorNum].setT(new Timer(2000));
+    		virtualElevators[elevatorNum].setT(new Timer(3000));
     		virtualElevators[elevatorNum].getT().start();
     	}
     	else if (virtualElevators[elevatorNum].getCurrentFloor() == virtualElevators[elevatorNum].floorsToVisit.get(0))
     	{
-    		if (virtualElevators[elevatorNum].getState() != 3 && virtualElevators[elevatorNum].getState() != 4 && virtualElevators[elevatorNum].getState() != 5 )
+
+    		if (virtualElevators[elevatorNum].getState() < 3)
     		{
     			dataToElevator[0] = (byte) 3;
+    			virtualElevators[elevatorNum].setT(new Timer(5000));
+        		virtualElevators[elevatorNum].getT().start();
     		}
     		else
     		{
     			dataToElevator[0] = (byte) virtualElevators[elevatorNum].getState();
     		}
+    		
+
     	}
-    	else if(virtualElevators[elevatorNum].isSoftFault())
-    	{
-    		dataToElevator[0] = (byte) 6;
-    	}
-    	else if(virtualElevators[elevatorNum].isHardFault())
-    	{
-    		dataToElevator[0] = (byte) 7;
-    	}
+    	
 
 		  //Sending the elevator a command
     	String command = commandToString(dataToElevator[0]);
@@ -203,6 +211,7 @@ public class Scheduler {
 	             e.printStackTrace();
 	             System.exit(1);
 	      }
+		  virtualElevators[elevatorNum].setState(dataToElevator[0]);
     }
     
     
@@ -231,17 +240,26 @@ public class Scheduler {
 
 	//Handles the message from the floor
 	private void handleFloorMessage(byte[] data) {
-		  elevatorServiceRequests.add(new ServiceRequest(data[1],data[3],data[2]));
-          checkServiceRequest();
-          if (virtualElevators[0].getState() == 0 && virtualElevators[0].getServiceDirection() != 0)
+		int requestType = 0;
+		if (data[2] == -1)
+		{
+			requestType = 1;
+		}
+		else if (data[2] == -1337)
+		{
+			requestType = 2;
+		}
+		  elevatorServiceRequests.add(new ServiceRequest(data[1],data[3],data[2], requestType));
+          Set elevatorsToService = checkServiceRequest();
+          if (elevatorsToService.contains(0) && virtualElevators[0].getState() == 0)
           {
         	  commandElevator(0);
           }
-          if (virtualElevators[1].getState() == 0 && virtualElevators[1].getServiceDirection() != 0)
+          if (elevatorsToService.contains(1) && virtualElevators[1].getState() == 0)
           {
         	  commandElevator(1);
           }
-          if (virtualElevators[2].getState() == 0 && virtualElevators[2].getServiceDirection() != 0)
+          if (elevatorsToService.contains(2) && virtualElevators[2].getState() == 0)
           {
         	  commandElevator(2);
           }
@@ -253,8 +271,10 @@ public class Scheduler {
 		int x = data[1];
 		  virtualElevators[x].setState(data[2]);
 		  virtualElevators[x].setCurrentFloor(data[3]);
+
+			 
 		  
-		  if (virtualElevators[x].getState() == 5)
+		  if (virtualElevators[x].getState() == 5 && virtualElevators[x].getCurrentFloor() == virtualElevators[x].floorsToVisit.get(0))
 		  {
 			  for(int i = 0;i < processedRequests.size(); i++) {
 				if(processedRequests.get(i).getElevatorAssigned() == x
@@ -265,21 +285,23 @@ public class Scheduler {
 			  }
 			  
 			  virtualElevators[x].floorsToVisit.remove(0);
+			  
 			  if (virtualElevators[x].floorsToVisit.size() == 0)
 			  {
 				  virtualElevators[x].setServiceDirection(0);
 				  virtualElevators[x].setState(0);
 			  }
 		  }
-		  if(virtualElevators[x].getT().isExpired()) {
+		  if(virtualElevators[x].getT().isExpired() && virtualElevators[x].getState() != 0) {
 			  virtualElevators[x].setHardFault(true);
+			  commandElevator(x);
 		  }
 		  elevatorProcessTimes.add((long)(System.currentTimeMillis() -
 				  ((data[4] * 3.6 * Math.pow(10, 6)) + (data[5] * 60000) + (data[6] * 1000) + twoBytesToShort(data[7],data[8]))));
 		  return x;
 	}
 	//Checks if any of the pending service requests are servicable
-	public void checkServiceRequest() {
+	public Set checkServiceRequest() {
 		int[] bestCases = new int[elevatorServiceRequests.size()];
 		int[] bestElevators = new int[elevatorServiceRequests.size()];
 		
@@ -295,10 +317,10 @@ public class Scheduler {
 			for(int j = 0; j < elevatorServiceRequests.size(); j++) {
 			 //if the elevator is hard faulted, skip elevator
 			 if(virtualElevators[i].isHardFault()) {
-			 } 
+			 }
 			 //if the elevator current floor is either above or below the pickup floor and is headed in the same direction and current direction
 		   	 else if((bestCases[j] > 1) &&
-					  (virtualElevators[i].getState() == elevatorServiceRequests.get(j).getDirection()) 
+					  (virtualElevators[i].getState() == elevatorServiceRequests.get(j).getDirection() && virtualElevators[i].getServiceDirection() == elevatorServiceRequests.get(j).getDirection()) 
 					  &&
 					  ((virtualElevators[i].getCurrentFloor() < elevatorServiceRequests.get(j).getPickup() && virtualElevators[i].getState() == 1)
 					  ||
@@ -324,9 +346,10 @@ public class Scheduler {
 		  }	
 		}
 		
+		Set elevatorsWithPendingCommands = new HashSet();
 		for (int i = elevatorServiceRequests.size()-1; i >= 0; i--)
 		{			
-		  	if (bestCases[i] <= 3)//if going same direction of serviceRequest
+		  	if (bestCases[i] <= 3 && !elevatorServiceRequests.get(i).isInvokeFault())//if going same direction of serviceRequest
 			{
 		  		if (!virtualElevators[bestElevators[i]].floorsToVisit.contains(elevatorServiceRequests.get(i).getPickup()))
 		  		{
@@ -335,6 +358,7 @@ public class Scheduler {
 		  		if (!virtualElevators[bestElevators[i]].floorsToVisit.contains(elevatorServiceRequests.get(i).getDestination()))
 		  		{
 		  			virtualElevators[bestElevators[i]].floorsToVisit.add(elevatorServiceRequests.get(i).getDestination());
+
 		  		}
 				virtualElevators[bestElevators[i]].setServiceDirection(elevatorServiceRequests.get(i).getDirection());
 
@@ -342,12 +366,29 @@ public class Scheduler {
 				
 				elevatorServiceRequests.get(i).setTimes(1);
 				processedRequests.add(elevatorServiceRequests.remove(i));
+				elevatorsWithPendingCommands.add(bestElevators[i]);			
 			}
-			else if (bestCases[i] > 3)
+			else if (bestCases[i] > 3 || elevatorServiceRequests.get(i).isInvokeFault() || elevatorServiceRequests.get(i).isInvokeSendStats())
 			{
 				//Leave the request to be serviced at a later date.
+				
+				//Invoke hard fault, for iteration 3
+				if (elevatorServiceRequests.get(i).isInvokeFault())
+				{
+					virtualElevators[bestElevators[i]].setHardFault(true);
+					elevatorServiceRequests.remove(i);
+					commandElevator(bestElevators[i]);
+
+				}
+				else if (elevatorServiceRequests.get(i).isInvokeSendStats())
+				{
+					elevatorServiceRequests.remove(i);
+
+				}
 			}
 		}
+
+		return elevatorsWithPendingCommands;
 
 	}
 	private void checkStats() {
@@ -378,8 +419,19 @@ public class Scheduler {
     	Scheduler scheduler = new Scheduler(3, 7);
     	while (true)
 		{
-			scheduler.sendReceive();
-		}
+			scheduler.sendReceive(); 
+			/*usefull printout for debugging
+			 * for (int j = 0; j < scheduler.virtualElevators.length; j++)
+			{
+				System.out.print("Elevator " + j + "floorsToVisit: ");
+				for (int i = 0; i < scheduler.virtualElevators[j].floorsToVisit.size(); i++)
+				{
+					System.out.print(scheduler.virtualElevators[j].floorsToVisit.get(i) + " ");
+				}
+				System.out.println("");
+			}
+			*/
+		}	
     }
     
 }

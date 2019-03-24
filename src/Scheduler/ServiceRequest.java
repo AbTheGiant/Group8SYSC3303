@@ -7,12 +7,21 @@ public class ServiceRequest {
 	private int elevatorAssigned;
 	
 	private long[] times;
+	private boolean invokeFault;
+	private boolean invokeSendStats;
 
-	public ServiceRequest(int pickup, int destination,int direction) {
+	public ServiceRequest(int pickup, int destination,int direction, int type) {
 		this.pickup = pickup;
 		this.destination = destination;
 		this.direction = direction;
-		
+		if (type == 1)
+		{
+			invokeFault = true;
+		}
+		else if (type == 2)
+		{
+			setInvokeSendStats(true);
+		}
 		times = new long[3];
 		//Time before assigned
 		times[0] = System.currentTimeMillis();
@@ -42,6 +51,10 @@ public class ServiceRequest {
 		return pickup;
 	}
 	
+	public boolean isInvokeFault() {
+		return invokeFault;
+	}
+	
 	//SETTER METHODS
 	public void setDestination(int destination) {
 		this.destination = destination;
@@ -62,5 +75,15 @@ public class ServiceRequest {
 	public void setElevatorAssigned(int elevatorAssigned) {
 		this.elevatorAssigned = elevatorAssigned;
 	}
-	
+	public void setInvokeFault(boolean invokeFault) {
+		this.invokeFault = invokeFault;
+	}
+
+	public boolean isInvokeSendStats() {
+		return invokeSendStats;
+	}
+
+	public void setInvokeSendStats(boolean invokeSendStats) {
+		this.invokeSendStats = invokeSendStats;
+	}
 }
