@@ -21,6 +21,7 @@ import FloorSubsystem.FloorSubsystem;
 import Scheduler.Scheduler;
 public class Main {
 
+	private static final String schedulerString = "192.168.0.11";
 
 	public static void main(String[] args) {
 		System.out.println("[Main]Please wait while the system is initialized...");
@@ -40,7 +41,7 @@ public class Main {
 		for (int i = 0; i < 3; i++)
 		{
 			try {
-				elevators[i] = new elevatorClass(7, i, InetAddress.getByName("192.168.0.11") );
+				elevators[i] = new elevatorClass(7, i, InetAddress.getByName(schedulerString) );
 			} catch (UnknownHostException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -57,7 +58,7 @@ public class Main {
 		for (int i = 0; i < 7; i++)
 		{
 			try {
-				floors[i] = new FloorSubsystem(i, 3, InetAddress.getByName("192.168.0.11"));
+				floors[i] = new FloorSubsystem(i, 3, InetAddress.getByName(schedulerString));
 			} catch (UnknownHostException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
