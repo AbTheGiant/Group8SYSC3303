@@ -4,11 +4,13 @@ public class ServiceRequest {
 	private int pickup;
 	private int destination;
 	private int direction;
+	private boolean invokeFault;
 	
-	public ServiceRequest(int pickup, int destination,int direction) {
+	public ServiceRequest(int pickup, int destination,int direction, boolean invokeFault) {
 		this.pickup = pickup;
 		this.destination = destination;
 		this.direction = direction;
+		this.invokeFault = invokeFault;
 	}
 	
 	public ServiceRequest() {
@@ -27,6 +29,10 @@ public class ServiceRequest {
 		return pickup;
 	}
 	
+	public boolean isInvokeFault() {
+		return invokeFault;
+	}
+	
 	//SETTER METHODS
 	public void setDestination(int destination) {
 		this.destination = destination;
@@ -39,5 +45,7 @@ public class ServiceRequest {
 	public void setPickup(int pickup) {
 		this.pickup = pickup;
 	}
-	
+	public void setInvokeFault(boolean invokeFault) {
+		this.invokeFault = invokeFault;
+	}
 }

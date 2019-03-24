@@ -180,8 +180,17 @@ public class Main {
             try (BufferedReader br = new BufferedReader(new FileReader(selectedFile))) {
                 String line;
                 while ((line = br.readLine()) != null) {
-                   floors[Integer.parseInt(line.split(" ")[1])].send((line.split(" ")[2].toUpperCase().equals("UP") ? 2:1), Integer.parseInt(line.split(" ")[3]), line.split(" ")[0]);
-                   Thread.sleep(2000);
+	                if (line.split(" ").length == 3)
+	                {
+	                   floors[Integer.parseInt(line.split(" ")[1])].send((line.split(" ")[2].toUpperCase().equals("UP") ? 2:1), Integer.parseInt(line.split(" ")[3]), line.split(" ")[0]);
+	                }
+	                else if (line.split(" ").length == 4)
+	                {
+		               floors[Integer.parseInt(line.split(" ")[1])].send(-1, Integer.parseInt(line.split(" ")[3]), line.split(" ")[0]);
+
+	                }	
+	                Thread.sleep(2000);
+
                 }
             }
         }

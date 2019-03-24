@@ -12,10 +12,12 @@ public class VirtualElevator {
 	private boolean isSoftFault, isHardFault;
 	private Timer t;
 	
-	public VirtualElevator(int floor) {
-		t = new Timer(2000);
-		currentFloor = floor;
+	public VirtualElevator(int elevatorNumber) {
+		t = new Timer(999999999);
+		elevatorNumber = elevatorNumber;
 		floorsToVisit = new ArrayList<Integer>();
+		isSoftFault = false;
+		isHardFault = false;
 	}
 	
 	public void sortFloorsToVisit(boolean ascending)
