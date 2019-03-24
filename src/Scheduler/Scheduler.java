@@ -15,15 +15,20 @@ public class Scheduler {
     int elevatorDirection, elevatorCurrentLevel, elevatorStatus;
     
     //Variables to send to the elevator class
-    int  currentElevatorNumber, elevatorDestination, numFloors;
+    int currentElevatorNumber, elevatorDestination, numFloors;
     
     VirtualElevator[] virtualElevators;
     ArrayList<ServiceRequest> elevatorServiceRequests;
+    ArrayList<ServiceRequest> processedRequests;
+    ArrayList<ServiceRequest> completedRequests;
     
     DatagramPacket sendPacket, receivePacket;
     DatagramSocket receiveSocket, SendSocket;
     
     InetAddress subsystemsAddress;
+    
+    ArrayList<Long> elevatorProcessTimes;
+    ArrayList<Long> floorProcessTimes;
     
     public Scheduler(int numberOfElevatorCars, int numberOfFloors) {
     	numFloors = numberOfFloors;
@@ -31,7 +36,12 @@ public class Scheduler {
 		for(int i = 0; i < numberOfElevatorCars; i++) {
 			virtualElevators[i] = new VirtualElevator(i);
 		}
+		
 		elevatorServiceRequests = new ArrayList<ServiceRequest>();
+		processedRequests = new ArrayList<ServiceRequest>();
+		completedRequests = new ArrayList<ServiceRequest>();
+		elevatorProcessTimes = new ArrayList<Long>();
+		floorProcessTimes = new ArrayList<Long>();
     }
     
     public void initSockets() {
@@ -234,7 +244,9 @@ public class Scheduler {
           if (virtualElevators[2].getState() == 0 && virtualElevators[2].getServiceDirection() != 0)
           {
         	  commandElevator(2);
-          }              
+          }
+          floorProcessTimes.add((long)(System.currentTimeMillis() -
+        				  ((data[4] * 3.6 * Math.pow(10, 6)) + (data[5] * 60000) + (data[6] * 1000) + twoBytesToShort(data[7],data[8]))));
 	}
 	//Handles the message from the elevator
 	private int handleElevatorMessage(byte[] data) {
@@ -244,6 +256,14 @@ public class Scheduler {
 		  
 		  if (virtualElevators[x].getState() == 5)
 		  {
+			  for(int i = 0;i < processedRequests.size(); i++) {
+				if(processedRequests.get(i).getElevatorAssigned() == x
+						&& processedRequests.get(i).getDestination() == virtualElevators[x].floorsToVisit.get(0)) {
+					processedRequests.get(i).setTimes(2);
+					completedRequests.add(processedRequests.remove(i));
+				}
+			  }
+			  
 			  virtualElevators[x].floorsToVisit.remove(0);
 			  if (virtualElevators[x].floorsToVisit.size() == 0)
 			  {
@@ -254,6 +274,8 @@ public class Scheduler {
 		  if(virtualElevators[x].getT().isExpired()) {
 			  virtualElevators[x].setHardFault(true);
 		  }
+		  elevatorProcessTimes.add((long)(System.currentTimeMillis() -
+				  ((data[4] * 3.6 * Math.pow(10, 6)) + (data[5] * 60000) + (data[6] * 1000) + twoBytesToShort(data[7],data[8]))));
 		  return x;
 	}
 	//Checks if any of the pending service requests are servicable
@@ -271,9 +293,8 @@ public class Scheduler {
 		
 		for(int i = 0; i < virtualElevators.length; i++) {
 			for(int j = 0; j < elevatorServiceRequests.size(); j++) {
+			 //if the elevator is hard faulted, skip elevator
 			 if(virtualElevators[i].isHardFault()) {
-				  bestCases[j] = 1000;
-				  bestElevators[j] = i;
 			 } 
 			 //if the elevator current floor is either above or below the pickup floor and is headed in the same direction and current direction
 		   	 else if((bestCases[j] > 1) &&
@@ -319,7 +340,8 @@ public class Scheduler {
 
 				virtualElevators[bestElevators[i]].sortFloorsToVisit(elevatorServiceRequests.get(i).getDirection() == 2);
 				
-				elevatorServiceRequests.remove(i);
+				elevatorServiceRequests.get(i).setTimes(1);
+				processedRequests.add(elevatorServiceRequests.remove(i));
 			}
 			else if (bestCases[i] > 3)
 			{
@@ -328,6 +350,14 @@ public class Scheduler {
 		}
 
 	}
+	private void checkStats() {
+		double pickupTime, assignedTime;
+		
+		for(ServiceRequest sr : completedRequests) {
+			
+		}
+	}
+	
     //A support method that converts a byte[] into a string;
     public static String makeString(byte[] data, int length)
     {
