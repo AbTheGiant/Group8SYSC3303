@@ -136,7 +136,7 @@ public class Main {
 
 		while (true)
 		{
-			System.out.println("[Main]:Please enter 0 to select a file to read from, or 1 for the interactive demo:");
+			System.out.println("[Main]:Please enter 0 to select a file to read from, or 1 for the interactive demo, or 2 to print out the stats:");
 			int response = reader.nextInt();
 			if (response == 0)
 			{
@@ -159,6 +159,10 @@ public class Main {
 			{
 				interactiveDemo(floors, reader);
 			}
+			else if (response == 2)
+			{
+				floors[0].send(-1337, 0, LocalTime.now().format(DateTimeFormatter.ofPattern("HH:mm:ss.SSS")));
+			}
 			else
 			{
 				System.out.println("[Main]:That input was incorrect");
@@ -180,11 +184,11 @@ public class Main {
             try (BufferedReader br = new BufferedReader(new FileReader(selectedFile))) {
                 String line;
                 while ((line = br.readLine()) != null) {
-	                if (line.split(" ").length == 3)
+	                if (line.split(" ").length == 4)
 	                {
 	                   floors[Integer.parseInt(line.split(" ")[1])].send((line.split(" ")[2].toUpperCase().equals("UP") ? 2:1), Integer.parseInt(line.split(" ")[3]), line.split(" ")[0]);
 	                }
-	                else if (line.split(" ").length == 4)
+	                else if (line.split(" ").length == 5)
 	                {
 		               floors[Integer.parseInt(line.split(" ")[1])].send(-1, Integer.parseInt(line.split(" ")[3]), line.split(" ")[0]);
 

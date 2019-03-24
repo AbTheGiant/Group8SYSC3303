@@ -143,7 +143,7 @@ public class Scheduler {
     	
     	if(virtualElevators[elevatorNum].isSoftFault())
     	{
-    		dataToElevator[0] = (byte) 6;
+    		dataToElevator[0] = (byte) 3;//send it the command to cycle its doors
     	}
     	else if(virtualElevators[elevatorNum].isHardFault())
     	{
@@ -230,7 +230,16 @@ public class Scheduler {
 
 	//Handles the message from the floor
 	private void handleFloorMessage(byte[] data) {
-		  elevatorServiceRequests.add(new ServiceRequest(data[1],data[3],data[2], (data[2] == -1)));
+		int requestType = 0;
+		if (data[2] == -1)
+		{
+			requestType = 1;
+		}
+		else if (data[2] == -1337)
+		{
+			requestType = 2;
+		}
+		  elevatorServiceRequests.add(new ServiceRequest(data[1],data[3],data[2], requestType));
           Set elevatorsToService = checkServiceRequest();
           if (elevatorsToService.contains(0) && virtualElevators[0].getState() == 0)
           {
@@ -265,6 +274,7 @@ public class Scheduler {
 		  }
 		  if(virtualElevators[x].getT().isExpired() && virtualElevators[x].getState() != 0) {
 			  virtualElevators[x].setHardFault(true);
+			  commandElevator(x);
 		  }
 		  return x;
 	}
@@ -336,7 +346,7 @@ public class Scheduler {
 				
 				elevatorServiceRequests.remove(i);
 			}
-			else if (bestCases[i] > 3 || elevatorServiceRequests.get(i).isInvokeFault())
+			else if (bestCases[i] > 3 || elevatorServiceRequests.get(i).isInvokeFault() || elevatorServiceRequests.get(i).isInvokeSendStats())
 			{
 				//Leave the request to be serviced at a later date.
 				
@@ -344,6 +354,14 @@ public class Scheduler {
 				if (elevatorServiceRequests.get(i).isInvokeFault())
 				{
 					virtualElevators[bestElevators[i]].setHardFault(true);
+					elevatorServiceRequests.remove(i);
+					commandElevator(bestElevators[i]);
+
+				}
+				else if (elevatorServiceRequests.get(i).isInvokeSendStats())
+				{
+					elevatorServiceRequests.remove(i);
+
 				}
 			}
 		}
@@ -371,12 +389,7 @@ public class Scheduler {
     	Scheduler scheduler = new Scheduler(3, 7);
     	while (true)
 		{
-			scheduler.sendReceive();
-			for (int j = 0; j < scheduler.virtualElevators.length; j++)
-			{
-				System.out.print("elevator" + j + " isHardFaulted="+scheduler.virtualElevators[j].isHardFault() + " ");
-			}
-			System.out.println("");
+			scheduler.sendReceive(); 
 			/*usefull printout for debugging
 			 * for (int j = 0; j < scheduler.virtualElevators.length; j++)
 			{

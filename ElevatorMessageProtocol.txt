@@ -9,6 +9,11 @@ The Elevator:
 		BYTE 1: ELEVATOR NUMBER [The elevator number, elevator 0, 1 or 2]
 		BYTE 2: STATE [0 = stationary, 1 = Up, 2 = down, 3 = openingDoors, 4 = open, 5 = closingDoors]
 		BYTE 3: CURRENT FLOOR [an int representing the floor ] 
+		BYTE 4: TIMESTAMP HOURS
+		BYTE 5: TIMESTAMP MINUTES
+		BYTE 6: TIMESTAMP SECONDS
+		BYTE 7: TIMESTAMP MILLISECONDS 1 [least sig. byte, aka.  0x#### && 0x00FF]
+		BYTE 8: TIMESTAMP MILLISECONDS 2 [second least sig. byte, aka. 0x#### && 0xFF00]
 	RECEIVES:
 		BYTE 0: COMMAND [0 = go stationary, 1 =go Up, 2 =go down, 3 = open doors at current floor]
 

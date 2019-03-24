@@ -5,12 +5,19 @@ public class ServiceRequest {
 	private int destination;
 	private int direction;
 	private boolean invokeFault;
-	
-	public ServiceRequest(int pickup, int destination,int direction, boolean invokeFault) {
+	private boolean invokeSendStats;
+	public ServiceRequest(int pickup, int destination,int direction, int type) {
 		this.pickup = pickup;
 		this.destination = destination;
 		this.direction = direction;
-		this.invokeFault = invokeFault;
+		if (type == 1)
+		{
+			invokeFault = true;
+		}
+		else if (type == 2)
+		{
+			setInvokeSendStats(true);
+		}
 	}
 	
 	public ServiceRequest() {
@@ -47,5 +54,13 @@ public class ServiceRequest {
 	}
 	public void setInvokeFault(boolean invokeFault) {
 		this.invokeFault = invokeFault;
+	}
+
+	public boolean isInvokeSendStats() {
+		return invokeSendStats;
+	}
+
+	public void setInvokeSendStats(boolean invokeSendStats) {
+		this.invokeSendStats = invokeSendStats;
 	}
 }

@@ -6,6 +6,8 @@ import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.SocketException;
 import java.net.UnknownHostException;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -126,7 +128,13 @@ public class elevatorClass implements Runnable{
 	    data[1] = (byte)elevatorNumber;//elevator number
 	    data[2] = (byte) state;//state. 0 = stationary, 1 = Up, 2 = down, 3 = openingDoors, 4 = open, 5 = closingDoors
 	    data[3]=(byte)currentFloor;//current elevator floor
-	  
+	    String timeStamp = LocalTime.now().format(DateTimeFormatter.ofPattern("HH:mm:ss.SSS")); 
+	    data[4] = (byte) Integer.parseInt(timeStamp.split(":")[0]);//hours
+	    data[5] = (byte) Integer.parseInt(timeStamp.split(":")[1]);//minutes
+	    data[6] = (byte) Integer.parseInt(timeStamp.split(":")[2].substring(0,2));//seconds
+	    
+	    data[7] = (byte) Short.parseShort(timeStamp.split(":")[2].substring(3));//Last byte of the milliseconds
+	    data[8] = (byte) (Short.parseShort(timeStamp.split(":")[2].substring(3))>>8);//second last byte of the milliseconds
 	    
 	    try {
 	          contactPacket = new DatagramPacket(data, data.length,
