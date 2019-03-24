@@ -245,7 +245,7 @@ public class Scheduler {
 		{
 			requestType = 1;
 		}
-		else if (data[2] == -1337)
+		else if (data[2] == -13)
 		{
 			requestType = 2;
 		}
@@ -354,7 +354,7 @@ public class Scheduler {
 		Set elevatorsWithPendingCommands = new HashSet();
 		for (int i = elevatorServiceRequests.size()-1; i >= 0; i--)
 		{			
-		  	if (bestCases[i] <= 3 && !elevatorServiceRequests.get(i).isInvokeFault())//if going same direction of serviceRequest
+		  	if (bestCases[i] <= 3 && !elevatorServiceRequests.get(i).isInvokeFault() && !elevatorServiceRequests.get(i).isInvokeSendStats())//if going same direction of serviceRequest
 			{
 		  		if (!virtualElevators[bestElevators[i]].floorsToVisit.contains(elevatorServiceRequests.get(i).getPickup()))
 		  		{
@@ -465,11 +465,11 @@ public class Scheduler {
 		System.out.println("Average Of Pickup Time: " + pickupTime);
 		System.out.println("Variance Of Pickup Time: " + variPickup);
 		
-		System.out.println("Average Of Elevator Process Time: " + elevatorprocesstime);
-		System.out.println("Variance Of Elevator Process Time: " + variEProcessTime);
+		System.out.println("Average Of Arrival Process Time: " + elevatorprocesstime);
+		System.out.println("Variance Of Arrival Process Time: " + variEProcessTime);
 		
-		System.out.println("Average Of Floor Process Time: " + floorprocesstime);
-		System.out.println("Variance Of Floor Process Time: " + variFProcessTime);
+		System.out.println("Average Of Floor Interface Time: " + floorprocesstime);
+		System.out.println("Variance Of Floor Interface Time: " + variFProcessTime);
 	}
 	
     //A support method that converts a byte[] into a string;

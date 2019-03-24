@@ -122,7 +122,7 @@ public class elevatorClass implements Runnable{
 	
 	//Notifies the floorSubsytem of the elevators status
 	private void notifyScheduler(int subsystem,int elevatorNumber,int state,int currentFloor) {
-		byte[] data = new byte[4];
+		byte[] data = new byte[9];
 	    
 	    data[0] = (byte)subsystem;
 	    data[1] = (byte)elevatorNumber;//elevator number
@@ -210,8 +210,8 @@ public class elevatorClass implements Runnable{
 			 		break;
 			 	case HARD_FAULT:
 			 		System.out.println("HARD FAULT OCCURED AT: " + motor.getCurrentFloor());
-			 		System.exit(0);
-			 		break;
+			 		Thread.currentThread().interrupt();
+			 		return;
 			 }
 			 executeCommand(receiveCall());
 		 }

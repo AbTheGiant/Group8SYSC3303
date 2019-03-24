@@ -109,6 +109,19 @@ HOW TO RUN:
 	Tests:
 	-Just run the .java of the test
 
+
+RATE MONOTONIC ANALYSIS:
+____________________________________
+|PROCESS     |PERIOD(ms)|Priority   |
+|------------|----------|-----------|
+|AssignElevat| 1.0      |3 	    |
+|------------|----------|-----------|
+|Pickup	     | 4045.0   |2	    |
+|------------|----------|-----------|
+|ArrivalSens | 1.5E12   |1	    | Variance = 1.01E8
+|------------|----------|-----------|
+|FloorInterfa| 1.5E12   |1	    | Variance = 5.44E16
+|____________|__________|___________|
 RESPONSIBILITIES:
 
 [ITERATION 1]

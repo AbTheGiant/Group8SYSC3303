@@ -162,7 +162,7 @@ public class Main {
 			}
 			else if (response == 2)
 			{
-				floors[0].send(-1337, 0, LocalTime.now().format(DateTimeFormatter.ofPattern("HH:mm:ss.SSS")));
+				floors[0].send(-13, 0, LocalTime.now().format(DateTimeFormatter.ofPattern("HH:mm:ss.SSS")));
 			}
 			else
 			{
