@@ -40,7 +40,7 @@ public class Main {
 			}
 		});
 		elevatorClass[] elevators = new elevatorClass[3];
-		//EXCLUDING SCHEDULER FOR RUNNING ON A SEPERATE PC
+		/*//EXCLUDING SCHEDULER FOR RUNNING ON A SEPERATE PC
 		Scheduler scheduler = new Scheduler(4, 7);
 		
 		new Thread(() -> {
@@ -50,12 +50,12 @@ public class Main {
 				scheduler.sendReceive();
 			}
 		}).start();
-		
+		*/
 		FloorSubsystem[] floors = new FloorSubsystem[7];
 		for (int i = 0; i < 3; i++)
 		{
 			try {
-				elevators[i] = new elevatorClass(7, i, InetAddress.getLocalHost());
+				elevators[i] = new elevatorClass(7, i, InetAddress.getByName(schedulerString));
 			} catch (UnknownHostException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -72,7 +72,7 @@ public class Main {
 		for (int i = 0; i < 7; i++)
 		{
 			try {
-				floors[i] = new FloorSubsystem(i, 3, InetAddress.getLocalHost());
+				floors[i] = new FloorSubsystem(i, 3, InetAddress.getByName(schedulerString));
 			} catch (UnknownHostException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
