@@ -133,8 +133,6 @@ public class FloorSubsystem {
 	      
 	      int len = receivePacket.getLength();
 
-	      
-
 	      //first i update the directional lamp
 	      if (data[1] == 1)
 	      {

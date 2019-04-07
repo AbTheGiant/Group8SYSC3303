@@ -14,7 +14,7 @@ public class VirtualElevator {
 	
 	public VirtualElevator(int elevatorNumber) {
 		t = new Timer(999999999);
-		elevatorNumber = elevatorNumber;
+		this.elevatorNumber = elevatorNumber;
 		floorsToVisit = new ArrayList<Integer>();
 		isSoftFault = false;
 		isHardFault = false;

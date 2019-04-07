@@ -106,8 +106,10 @@ public class Scheduler {
               }              
               
           }
-          
-            
+         
+          View.updateSoftFaults(virtualElevators[0].isSoftFault(), virtualElevators[1].isSoftFault(), virtualElevators[2].isSoftFault(), virtualElevators[3].isSoftFault());
+          View.updateHardFaults(virtualElevators[0].isHardFault(), virtualElevators[1].isHardFault(), virtualElevators[2].isHardFault(),virtualElevators[3].isHardFault());
+          View.updateElevatorFloors(virtualElevators[0].getCurrentFloor(), virtualElevators[1].getCurrentFloor(),virtualElevators[2].getCurrentFloor(),virtualElevators[3].getCurrentFloor());
           SendSocket.close();
           receiveSocket.close();
     }
