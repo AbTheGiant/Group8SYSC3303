@@ -23,7 +23,8 @@ import Scheduler.Scheduler;
 import Scheduler.View;
 public class Main {
 
-	private static final String schedulerString = "192.168.0.11";
+	//THIS STRING WAS USED TO ALLOW MULTI-PC OPERATION
+	private static final String schedulerString = "";
 	private static View view;
 	
 	public static void main(String[] args) {
@@ -40,7 +41,7 @@ public class Main {
 			}
 		});
 		elevatorClass[] elevators = new elevatorClass[3];
-		/*//EXCLUDING SCHEDULER FOR RUNNING ON A SEPERATE PC
+		//EXCLUDING SCHEDULER FOR RUNNING ON A SEPERATE PC
 		Scheduler scheduler = new Scheduler(4, 7);
 		
 		new Thread(() -> {
@@ -50,12 +51,12 @@ public class Main {
 				scheduler.sendReceive();
 			}
 		}).start();
-		*/
+		
 		FloorSubsystem[] floors = new FloorSubsystem[7];
 		for (int i = 0; i < 3; i++)
 		{
 			try {
-				elevators[i] = new elevatorClass(7, i, InetAddress.getByName(schedulerString));
+				elevators[i] = new elevatorClass(7, i, InetAddress.getLocalHost());
 			} catch (UnknownHostException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -72,7 +73,7 @@ public class Main {
 		for (int i = 0; i < 7; i++)
 		{
 			try {
-				floors[i] = new FloorSubsystem(i, 3, InetAddress.getByName(schedulerString));
+				floors[i] = new FloorSubsystem(i, 3, InetAddress.getLocalHost());
 			} catch (UnknownHostException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();

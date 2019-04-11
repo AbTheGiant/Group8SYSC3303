@@ -34,6 +34,7 @@ PACKAGES: There are five packages included in the src folder. Each package conta
 							Scheduler.java : This class represents the Scheduler system. It is the middle system between the Floor and the Elevator and is in charge of communicating with both systems through sending and receiving datagram packets
 							VirtualElevators.java : This class is the virtual representation of the physical elevators
 							ServiceRequest.java : This class tracks the service requests and their different timings
+							View.java : This class creates and displays the GUI for the elevators, displaying floor number, status, queues and faults
 	Test - 				This package contains the ButtonTest.java, ElevatorClassTest.java, ElevatorMotor.java class files
 							ButtonTest.java : The duty of this class is to test the buttons in the systems.
 							ElevatorClassTest.java : The duty of this class is to test the functionality of the elevator class
@@ -109,6 +110,12 @@ HOW TO RUN:
 	Tests:
 	-Just run the .java of the test
 
+REFLECTION ON THE DESIGN:
+-The Scheduler system required more debugging due to the lack of messages synching sometimes, causing the system to freeze with the current design.
+
+-The Elevator system functioned on a state machine with full-filled all the states a elevator requires such as stationary,going up, going down, openning door,doors open, closing doors, doors closed
+	-With the above Elevator system, debugging where issues may occur were easily identifible.
+
 
 RATE MONOTONIC ANALYSIS:
 ____________________________________
@@ -122,6 +129,7 @@ ____________________________________
 |------------|----------|-----------|
 |FloorInterfa| 1.5E12   |1	    | Variance = 5.44E16
 |____________|__________|___________|
+
 RESPONSIBILITIES:
 
 [ITERATION 1]
@@ -163,3 +171,15 @@ JUnit and Test Cases - 	Kyle Smith, Meet Digrajkar and Abiola Olajide
 State Machine Diagram - Kyle Smith
 UML Diagram - 		Emmanuel and Meet
 EMP document 		Kyle Smith
+
+[ITERATION 5]
+Creation of a display console showing various information such as status, floor number, queues, faults of each elevator
+Main Class - Kyle Smith
+View - Meet Digrajkar and Kyle Smith
+Scheduler - Usman Babakura and Meet Digrajkar And Kyle Smith
+Elevator - Abiola Olajide and Emmanuel and Kyle Smith and Meet Digrajkar
+README.txt - Abiola Olajide and Emmanuel and Kyle Smith and Meet Digrajkar
+JUnit and Test Cases - 	Kyle Smith, Meet Digrajkar and Abiola Olajide
+Sequence Diagram - Kyle Smith, Meet Digrajkar
+State Machine Diagram - Kyle Smith
+UML Diagram - 		Emmanuel and Meet
