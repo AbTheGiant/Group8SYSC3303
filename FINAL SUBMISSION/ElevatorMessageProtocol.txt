@@ -1,0 +1,59 @@
+Elevator Message Protocol (EMP)
+author: Kyle Smith
+
+The purpose of this document is to outline the format of messages between our three sub systems for easy reference
+
+The Elevator:
+	SENDS: 
+		BYTE 0: SENDER [who this packet came from, ***0 = ELEVATOR***, 1 = floor subsystem]
+		BYTE 1: ELEVATOR NUMBER [The elevator number, elevator 0, 1 or 2]
+		BYTE 2: STATE [0 = stationary, 1 = Up, 2 = down, 3 = openingDoors, 4 = open, 5 = closingDoors]
+		BYTE 3: CURRENT FLOOR [an int representing the floor ] 
+		BYTE 4: TIMESTAMP HOURS
+		BYTE 5: TIMESTAMP MINUTES
+		BYTE 6: TIMESTAMP SECONDS
+		BYTE 7: TIMESTAMP MILLISECONDS 1 [least sig. byte, aka.  0x#### && 0x00FF]
+		BYTE 8: TIMESTAMP MILLISECONDS 2 [second least sig. byte, aka. 0x#### && 0xFF00]
+	RECEIVES:
+		BYTE 0: COMMAND [0 = go stationary, 1 =go Up, 2 =go down, 3 = open doors at current floor]
+
+The Floor Subsystem	
+	SENDS:  
+		BYTE 0: SENDER [who this packet came from, 0 = elevator, ***1 = FLOOR SUBSYSTEM***]
+		BYTE 1: PICKUP FLOOR [the floor number to pickup the passenger]
+		BYTE 2: DIRECTION [The direction the elevator will go AFTER reaching the pickup 1 = Up, 2 = down]
+		BYTE 3: DESTINATION FLOOR [the floor the elevator must stop at to drop off its passenger]
+		BYTE 4: TIMESTAMP HOURS
+		BYTE 5: TIMESTAMP MINUTES
+		BYTE 6: TIMESTAMP SECONDS
+		BYTE 7: TIMESTAMP MILLISECONDS 1 [least sig. byte, aka.  0x#### && 0x00FF]
+		BYTE 8: TIMESTAMP MILLISECONDS 2 [second least sig. byte, aka. 0x#### && 0xFF00]	
+	RECEIVES:
+		BYTE 0: ELEVATOR NUMBER [The elevator number you're informing the subsystem of, elevator 0, 1 or 2]
+		BYTE 1: STATE [state of the elevator, ONLY SEND 0 = stationary, 1 = Up, 2 = down, during states 3/4/5 = 0/1/2 depending on next state]
+		BYTE 2: CURRENT FLOOR [the floor of the elevator you're informing the subsystem of, 0-6]
+		BYTE 3: ELEVATOR ARRIVED [0 = elevator not stopping, 1 = elevator stopping]
+
+The Scheduler
+	This class will be responsible for sending the packets the other two classes receive. Here is the breakdown
+	of when it should send the messages / how to determine what to send.
+	
+	Rules
+		1: Must update each floor when a direction change occurs in an elevator, or it goes stationary
+		2: Must keep track of all service requests (added to a list when the floor sends a message)
+		3: Must ensure the virtual elevators are synced with actual elevators (updated whenever the elevator sends a message).
+		4: Must always respond to the elevator messages, giving it a command. EXCEPT FOR STATES 3 and 4 (after 5, tell it to start moving or stay stationary)
+		5: After any message received (either elevator status update, or floor service request) check if any elevators can handle any of the service requests
+			1: Check each service request against each elevator (nested for loop, i = elevator, j = service)
+			2: Check which case it falls under in the algorithm
+				BEST: IMMEDIATELY SERVICE THE REQUEST (add it to the elevators floor queue?)
+				2nd: Check other elevators to see if they fall under the best case, but save this as a possible service handler
+				3rd: this elevator can not handle the service request
+			3: Select the elevator with the best case (this can be implemented however you want using the last two steps)
+
+	Algorithm:
+		BEST = DOESNT REQUIRE DIRECTION CHANGE, ALREADY ABOVE/BELOW pickup and destination is BELOW/ABOVE respectively.
+		2nd = HEADED IN OPPOSITE DIRECTION OF SERVICE.DIRECTION, AND ELEVATOR.serviceDirection = SERVICE>DIRECTION 
+		3rd = STATIONARY
+		4th = cant be handled
+		
